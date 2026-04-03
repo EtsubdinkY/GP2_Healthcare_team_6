@@ -69,7 +69,7 @@ END;
 $$ LANGUAGE plpgsql;
 
 
--- HOSPITAL TABLE with constraints to ensure data integrity, including checks for state and zip code formats, bed count based on facility type, and unique hospital names. The department table references the hospital and ensures unique department names within each hospital. The provider table references the department and includes checks for NPI and DEA number formats. The patient table includes checks for MRN and SSN formats, as well as contact information requirements. The emergency_contact table references the patient and includes relationship types. The allergy table references the patient and includes severity levels. The appointment table references both patient and provider, with constraints on appointment times and statuses. The medication table includes controlled substance scheduling. The prescription table references patient, provider, and medication, with checks for controlled substances and DEA numbers. The admission table references patient, hospital, and provider, with checks on admission and discharge dates. The insurance_plan table includes unique payer and plan types. The patient_insurance table references patient and insurance_plan, with coverage types and date checks. The billing_record table references appointments and patient insurance, with checks on amounts and billing codes. The claim table references billing records and patient insurance, with status tracking. The lab_test, lab_order, lab_order_item, and lab_result tables manage lab testing processes with appropriate relationships and constraints.
+-- HOSPITAL TABLE with constraints to ensure data integrity, including checks for state and zip code formats, bed count based on facility type, and unique hospital names.
 
 CREATE TABLE hospital
 (
