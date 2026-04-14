@@ -14,7 +14,6 @@ from src.repositories import (
 
 @dataclass
 class PrescriptionDetail:
-    """Prescription with related patient, provider, and medication information."""
     prescription: Prescription
     patient: Optional[Patient]
     provider: Optional[Provider]
@@ -22,8 +21,6 @@ class PrescriptionDetail:
 
 
 class PrescriptionService:
-    """Business logic for prescription operations."""
-
     def __init__(self) -> None:
         self.prescription_repo = PrescriptionRepository()
         self.patient_repo = PatientRepository()
@@ -31,27 +28,21 @@ class PrescriptionService:
         self.medication_repo = MedicationRepository()
 
     def get_all_prescriptions(self) -> list[Prescription]:
-        """Retrieve all prescriptions."""
         return self.prescription_repo.find_all()
 
     def get_prescription_by_id(self, rx_id: int) -> Optional[Prescription]:
-        """Retrieve a prescription by ID."""
         return self.prescription_repo.find_by_id(rx_id)
 
     def create_prescription(self, prescription: Prescription) -> Prescription:
-        """Create a new prescription."""
         return self.prescription_repo.create(prescription)
 
     def update_prescription(self, rx_id: int, prescription: Prescription) -> Optional[Prescription]:
-        """Update an existing prescription."""
         return self.prescription_repo.update(rx_id, prescription)
 
     def delete_prescription(self, rx_id: int) -> bool:
-        """Delete a prescription."""
         return self.prescription_repo.delete(rx_id)
 
     def get_prescription_detail(self, rx_id: int) -> Optional[PrescriptionDetail]:
-        """Get prescription with patient, provider, and medication details."""
         prescription = self.prescription_repo.find_by_id(rx_id)
         if prescription is None:
             return None
@@ -68,7 +59,6 @@ class PrescriptionService:
         )
 
     def get_patient_prescriptions(self, patient_id: int) -> list[PrescriptionDetail]:
-        """Get all prescriptions for a specific patient."""
         all_prescriptions = self.prescription_repo.find_all()
 
         patient = self.patient_repo.find_by_id(patient_id)
@@ -91,7 +81,6 @@ class PrescriptionService:
         return result
 
     def get_active_prescriptions(self) -> list[PrescriptionDetail]:
-        """Get all active prescriptions with full details."""
         all_prescriptions = self.prescription_repo.find_all()
 
         active = [rx for rx in all_prescriptions if rx.status == 'active']
@@ -111,7 +100,6 @@ class PrescriptionService:
         return result
 
     def get_controlled_substances(self) -> list[PrescriptionDetail]:
-        """Get all controlled substance prescriptions for DEA reporting."""
         all_prescriptions = self.prescription_repo.find_all()
 
         controlled = [rx for rx in all_prescriptions if rx.is_controlled]
@@ -131,7 +119,6 @@ class PrescriptionService:
         return result
 
     def discontinue_prescription(self, rx_id: int) -> Optional[Prescription]:
-        """Discontinue a prescription by updating its status."""
         prescription = self.prescription_repo.find_by_id(rx_id)
         if prescription is None:
             return None

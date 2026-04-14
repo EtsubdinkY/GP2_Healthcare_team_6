@@ -14,42 +14,33 @@ from src.repositories import (
 
 @dataclass
 class AppointmentDetail:
-    """Appointment with related patient and provider information."""
     appointment: Appointment
     patient: Optional[Patient]
     provider: Optional[Provider]
 
 
 class AppointmentService:
-    """Business logic for appointment operations."""
-
     def __init__(self) -> None:
         self.appointment_repo = AppointmentRepository()
         self.patient_repo = PatientRepository()
         self.provider_repo = ProviderRepository()
 
     def get_all_appointments(self) -> list[Appointment]:
-        """Retrieve all appointments."""
         return self.appointment_repo.find_all()
 
     def get_appointment_by_id(self, appt_id: int) -> Optional[Appointment]:
-        """Retrieve an appointment by ID."""
         return self.appointment_repo.find_by_id(appt_id)
 
     def create_appointment(self, appointment: Appointment) -> Appointment:
-        """Create a new appointment."""
         return self.appointment_repo.create(appointment)
 
     def update_appointment(self, appt_id: int, appointment: Appointment) -> Optional[Appointment]:
-        """Update an existing appointment."""
         return self.appointment_repo.update(appt_id, appointment)
 
     def delete_appointment(self, appt_id: int) -> bool:
-        """Delete an appointment."""
         return self.appointment_repo.delete(appt_id)
 
     def get_appointment_detail(self, appt_id: int) -> Optional[AppointmentDetail]:
-        """Get appointment with patient and provider details."""
         appointment = self.appointment_repo.find_by_id(appt_id)
         if appointment is None:
             return None
@@ -64,7 +55,6 @@ class AppointmentService:
         )
 
     def get_upcoming_appointments(self) -> list[AppointmentDetail]:
-        """Get all upcoming scheduled appointments with details."""
         today = date.today()
         all_appointments = self.appointment_repo.find_all()
 
@@ -86,7 +76,6 @@ class AppointmentService:
         return result
 
     def get_provider_schedule(self, provider_id: int) -> list[AppointmentDetail]:
-        """Get upcoming appointments for a specific provider."""
         today = date.today()
         all_appointments = self.appointment_repo.find_all()
 
@@ -110,7 +99,6 @@ class AppointmentService:
         return result
 
     def get_appointments_by_date(self, target_date: date) -> list[AppointmentDetail]:
-        """Get all appointments for a specific date."""
         all_appointments = self.appointment_repo.find_all()
 
         date_appointments = [
@@ -131,7 +119,6 @@ class AppointmentService:
         return result
 
     def cancel_appointment(self, appt_id: int) -> Optional[Appointment]:
-        """Cancel an appointment by updating its status."""
         appointment = self.appointment_repo.find_by_id(appt_id)
         if appointment is None:
             return None

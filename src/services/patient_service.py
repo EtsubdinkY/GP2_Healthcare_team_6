@@ -15,7 +15,6 @@ from src.repositories import (
 
 @dataclass
 class PatientDashboard:
-    """Aggregated view of patient information for clinical use."""
     patient: Patient
     insurance_coverage: list[PatientInsurance]
     active_prescriptions: list[Prescription]
@@ -23,8 +22,6 @@ class PatientDashboard:
 
 
 class PatientService:
-    """Business logic for patient operations."""
-
     def __init__(self) -> None:
         self.patient_repo = PatientRepository()
         self.insurance_repo = PatientInsuranceRepository()
@@ -32,35 +29,21 @@ class PatientService:
         self.appointment_repo = AppointmentRepository()
 
     def get_all_patients(self) -> list[Patient]:
-        """Retrieve all patients."""
         return self.patient_repo.find_all()
 
     def get_patient_by_id(self, patient_id: int) -> Optional[Patient]:
-        """Retrieve a patient by ID."""
         return self.patient_repo.find_by_id(patient_id)
 
     def create_patient(self, patient: Patient) -> Patient:
-        """Create a new patient record."""
         return self.patient_repo.create(patient)
 
     def update_patient(self, patient_id: int, patient: Patient) -> Optional[Patient]:
-        """Update an existing patient record."""
         return self.patient_repo.update(patient_id, patient)
 
     def delete_patient(self, patient_id: int) -> bool:
-        """Delete a patient record."""
         return self.patient_repo.delete(patient_id)
 
     def get_patient_dashboard(self, patient_id: int) -> Optional[PatientDashboard]:
-        """
-        Get comprehensive patient dashboard combining:
-        - Patient demographics
-        - Insurance coverage
-        - Active prescriptions
-        - Upcoming appointments
-
-        This is useful when a patient arrives for an appointment.
-        """
         patient = self.patient_repo.find_by_id(patient_id)
         if patient is None:
             return None
@@ -99,10 +82,6 @@ class PatientService:
         )
 
     def get_polypharmacy_patients(self, threshold: int = 5) -> list[tuple[Patient, int]]:
-        """
-        Find patients with polypharmacy risk (5+ active prescriptions).
-        Returns list of (patient, prescription_count) tuples.
-        """
         all_prescriptions = self.prescription_repo.find_all()
         all_patients = self.patient_repo.find_all()
 
@@ -124,7 +103,6 @@ class PatientService:
         return result
 
     def search_patients_by_name(self, search_term: str) -> list[Patient]:
-        """Search patients by first or last name."""
         all_patients = self.patient_repo.find_all()
         search_lower = search_term.lower()
         return [
