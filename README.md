@@ -206,6 +206,3 @@ The `postgresql/queries.sql` file contains 8 documented queries:
 - Sensitive data (SSN) is optional and should be handled according to HIPAA guidelines
 - This is a demonstration project using synthetic data only
 
-## License
-
-This project is for educational purposes as part of the Data Storage and Databases course.
