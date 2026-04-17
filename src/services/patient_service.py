@@ -22,90 +22,90 @@ class PatientDashboard:
 
 
 class PatientService:
-    def __init__(self) -> None:
+
+    def __init__(self):
         self.patient_repo = PatientRepository()
         self.insurance_repo = PatientInsuranceRepository()
         self.prescription_repo = PrescriptionRepository()
         self.appointment_repo = AppointmentRepository()
 
-    def get_all_patients(self) -> list[Patient]:
+    def get_all_patients(self):
         return self.patient_repo.find_all()
 
-    def get_patient_by_id(self, patient_id: int) -> Optional[Patient]:
+    def get_patient_by_id(self, patient_id: int):
         return self.patient_repo.find_by_id(patient_id)
 
-    def create_patient(self, patient: Patient) -> Patient:
+    def create_patient(self, patient: Patient):
         return self.patient_repo.create(patient)
 
-    def update_patient(self, patient_id: int, patient: Patient) -> Optional[Patient]:
+    def update_patient(self, patient_id: int, patient: Patient):
         return self.patient_repo.update(patient_id, patient)
 
-    def delete_patient(self, patient_id: int) -> bool:
+    def delete_patient(self, patient_id: int):
         return self.patient_repo.delete(patient_id)
 
-    def get_patient_dashboard(self, patient_id: int) -> Optional[PatientDashboard]:
+    def get_patient_dashboard(self, patient_id: int):
         patient = self.patient_repo.find_by_id(patient_id)
-        if patient is None:
+        if not patient:
             return None
 
-        # Get insurance coverage
-        insurance_list = self.insurance_repo.find_by_patient_id(patient_id)
-
-        # Filter to active coverage (end_date is null or in the future)
         today = date.today()
-        active_insurance = [
-            ins for ins in insurance_list
-            if ins.end_date is None or ins.end_date >= today
-        ]
 
-        # Get all prescriptions and filter to active ones
-        all_prescriptions = self.prescription_repo.find_all()
-        active_prescriptions = [
-            rx for rx in all_prescriptions
-            if rx.patient_id == patient_id and rx.status == 'active'
-        ]
+        # grab insurance records and keep only the active ones
+        all_insurance = self.insurance_repo.find_by_patient_id(patient_id)
+        active_insurance = []
+        for ins in all_insurance:
+            if ins.end_date is None or ins.end_date >= today:
+                active_insurance.append(ins)
 
-        # Get all appointments and filter to upcoming ones for this patient
-        all_appointments = self.appointment_repo.find_all()
-        upcoming_appointments = [
-            appt for appt in all_appointments
-            if appt.patient_id == patient_id
-            and appt.appt_date >= today
-            and appt.status == 'scheduled'
-        ]
+        # pull prescriptions for this patient (status must be active)
+        rxs = self.prescription_repo.find_all()
+        active_prescriptions = []
+        for rx in rxs:
+            if rx.patient_id == patient_id and rx.status == 'active':
+                active_prescriptions.append(rx)
+
+        # same idea for appointments - only upcoming scheduled ones
+        appts = self.appointment_repo.find_all()
+        upcoming = []
+        for appt in appts:
+            if appt.patient_id == patient_id and appt.status == 'scheduled':
+                if appt.appt_date >= today:
+                    upcoming.append(appt)
 
         return PatientDashboard(
             patient=patient,
             insurance_coverage=active_insurance,
             active_prescriptions=active_prescriptions,
-            upcoming_appointments=upcoming_appointments,
+            upcoming_appointments=upcoming,
         )
 
-    def get_polypharmacy_patients(self, threshold: int = 5) -> list[tuple[Patient, int]]:
-        all_prescriptions = self.prescription_repo.find_all()
-        all_patients = self.patient_repo.find_all()
+    def get_polypharmacy_patients(self, threshold=5):
+        # polypharmacy = patient on 5+ active meds at once
+        rxs = self.prescription_repo.find_all()
+        patients = self.patient_repo.find_all()
 
-        # Count active prescriptions per patient
-        prescription_counts: dict[int, int] = {}
-        for rx in all_prescriptions:
+        counts = {}
+        for rx in rxs:
             if rx.status == 'active':
-                prescription_counts[rx.patient_id] = prescription_counts.get(rx.patient_id, 0) + 1
+                if rx.patient_id not in counts:
+                    counts[rx.patient_id] = 0
+                counts[rx.patient_id] += 1
 
-        # Filter patients with >= threshold prescriptions
-        result = []
-        for patient in all_patients:
-            count = prescription_counts.get(patient.patient_id, 0)
-            if count >= threshold:
-                result.append((patient, count))
+        flagged = []
+        for p in patients:
+            n = counts.get(p.patient_id, 0)
+            if n >= threshold:
+                flagged.append((p, n))
 
-        # Sort by prescription count descending
-        result.sort(key=lambda x: x[1], reverse=True)
-        return result
+        flagged.sort(key=lambda x: x[1], reverse=True)
+        return flagged
 
-    def search_patients_by_name(self, search_term: str) -> list[Patient]:
-        all_patients = self.patient_repo.find_all()
-        search_lower = search_term.lower()
-        return [
-            p for p in all_patients
-            if search_lower in p.first_name.lower() or search_lower in p.last_name.lower()
-        ]
+    def search_patients_by_name(self, search_term: str):
+        patients = self.patient_repo.find_all()
+        term = search_term.lower()
+        matches = []
+        for p in patients:
+            if term in p.first_name.lower() or term in p.last_name.lower():
+                matches.append(p)
+        return matches
