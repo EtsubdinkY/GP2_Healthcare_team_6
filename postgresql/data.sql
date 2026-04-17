@@ -863,6 +863,27 @@ VALUES (1, 1, '2025-09-01', '08:00', 20, 'scheduled', 'Follow-up', 'Routine foll
        (110, 10, '2026-04-08', '14:45', 60, 'no_show', 'Annual Physical', 'Annual wellness visit',
         'Appointment note 220');
 
+INSERT INTO appointment
+    (patient_id, provider_id, appt_date, appt_time, duration, status, appt_type, reason, notes)
+VALUES
+    (1, 1, CURRENT_DATE + 3, '09:00:00', 30, 'scheduled', 'Follow-up', 'Routine follow-up', 'Added for query testing'),
+    (2, 2, CURRENT_DATE + 5, '10:00:00', 30, 'checked_in', 'Consultation', 'Medication review', 'Added for query testing'),
+    (3, 3, CURRENT_DATE + 7, '11:00:00', 45, 'scheduled', 'New Patient', 'Initial assessment', 'Added for query testing');
+
+INSERT INTO appointment
+    (patient_id, provider_id, appt_date, appt_time, duration, status, appt_type, reason, notes)
+VALUES
+    (1, 1, CURRENT_DATE + 2, '09:00:00', 30, 'scheduled', 'Follow-up', 'Routine visit', 'Test data'),
+    (2, 2, CURRENT_DATE + 3, '10:00:00', 30, 'checked_in', 'Consultation', 'Medication review', 'Test data'),
+    (3, 3, CURRENT_DATE + 5, '11:00:00', 45, 'scheduled', 'New Patient', 'Initial check', 'Test data');
+
+INSERT INTO appointment
+    (patient_id, provider_id, appt_date, appt_time, duration, status, appt_type, reason, notes)
+VALUES
+    (1, 1, '2026-04-20', '09:00:00', 30, 'scheduled', 'Follow-up', 'Routine follow-up', 'Test future'),
+    (2, 2, '2026-04-22', '10:00:00', 30, 'checked_in', 'Consultation', 'Medication review', 'Test future'),
+    (3, 3, '2026-04-25', '11:00:00', 45, 'scheduled', 'New Patient', 'Initial check', 'Test future');
+
 -- MEDICATIONS
 INSERT INTO medication (name, generic_name, drug_class, controlled_substance_schedule, form)
 VALUES ('Lipitor', 'Atorvastatin', 'Statin', NULL, 'Tablet'),
@@ -1070,6 +1091,24 @@ VALUES (1, 1, 1, '2025-09-01', '5 mg', 'Once daily', 7, 0, FALSE, NULL, NULL, 'a
        (48, 18, 18, '2026-02-05', '100 mg', 'Every 6 hours as needed', 14, 1, FALSE, NULL, NULL, 'completed'),
        (49, 19, 19, '2026-02-06', '250 mg', 'At bedtime', 21, 2, FALSE, NULL, NULL, 'cancelled'),
        (50, 20, 20, '2026-02-07', '500 mg', 'Three times daily', 30, 0, FALSE, NULL, NULL, 'active');
+
+INSERT INTO prescription
+    (patient_id, provider_id, med_id, date_written, start_date, end_date, dosage, frequency, quantity, refills, status, is_controlled, controlled_substance_schedule, prescriber_dea_number)
+VALUES
+    (1, 1, 1, CURRENT_DATE, CURRENT_DATE, CURRENT_DATE + INTERVAL '30 days', '10 mg', 'Once daily', 30, 1, 'active', FALSE, NULL, NULL),
+    (1, 2, 2, CURRENT_DATE, CURRENT_DATE, CURRENT_DATE + INTERVAL '30 days', '20 mg', 'Twice daily', 60, 1, 'active', FALSE, NULL, NULL),
+    (1, 3, 3, CURRENT_DATE, CURRENT_DATE, CURRENT_DATE + INTERVAL '30 days', '5 mg', 'Once daily', 30, 1, 'active', FALSE, NULL, NULL),
+    (1, 4, 4, CURRENT_DATE, CURRENT_DATE, CURRENT_DATE + INTERVAL '30 days', '250 mg', 'Every 8 hours', 21, 0, 'active', FALSE, NULL, NULL),
+    (1, 5, 5, CURRENT_DATE, CURRENT_DATE, CURRENT_DATE + INTERVAL '30 days', '50 mg', 'At bedtime', 30, 2, 'active', FALSE, NULL, NULL);
+
+INSERT INTO prescription
+    (patient_id, provider_id, med_id, date_written, dosage, frequency, quantity, refills, is_controlled, controlled_substance_schedule, prescriber_dea_number, status)
+VALUES
+    (1, 1, 1, CURRENT_DATE, '10 mg', 'Once daily', 30, 1, FALSE, NULL, NULL, 'active'),
+    (1, 2, 2, CURRENT_DATE, '20 mg', 'Twice daily', 60, 1, FALSE, NULL, NULL, 'active'),
+    (1, 3, 3, CURRENT_DATE, '5 mg', 'Once daily', 30, 1, FALSE, NULL, NULL, 'active'),
+    (1, 4, 4, CURRENT_DATE, '250 mg', 'Every 8 hours', 21, 0, FALSE, NULL, NULL, 'active'),
+    (1, 5, 5, CURRENT_DATE, '50 mg', 'At bedtime', 30, 2, FALSE, NULL, NULL, 'active');
 
 -- ADMISSIONS
 INSERT INTO admission (patient_id, hospital_id, provider_id, admit_date, discharge_date, admit_reason,
