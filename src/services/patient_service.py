@@ -51,14 +51,14 @@ class PatientService:
 
         today = date.today()
 
-        # grab insurance records and keep only the active ones
+        # grab insurance records and keep only the ones still active
         all_insurance = self.insurance_repo.find_by_patient_id(patient_id)
         active_insurance = []
         for ins in all_insurance:
             if ins.end_date is None or ins.end_date >= today:
                 active_insurance.append(ins)
 
-        # pull prescriptions for this patient (status must be active)
+        # pull prescriptions for this patient (active status only)
         rxs = self.prescription_repo.find_all()
         active_prescriptions = []
         for rx in rxs:
