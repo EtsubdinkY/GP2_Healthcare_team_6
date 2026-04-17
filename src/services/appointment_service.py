@@ -20,120 +20,105 @@ class AppointmentDetail:
 
 
 class AppointmentService:
-    def __init__(self) -> None:
+
+    def __init__(self):
         self.appointment_repo = AppointmentRepository()
         self.patient_repo = PatientRepository()
         self.provider_repo = ProviderRepository()
 
-    def get_all_appointments(self) -> list[Appointment]:
+    def get_all_appointments(self):
         return self.appointment_repo.find_all()
 
-    def get_appointment_by_id(self, appt_id: int) -> Optional[Appointment]:
+    def get_appointment_by_id(self, appt_id: int):
         return self.appointment_repo.find_by_id(appt_id)
 
-    def create_appointment(self, appointment: Appointment) -> Appointment:
+    def create_appointment(self, appointment: Appointment):
         return self.appointment_repo.create(appointment)
 
-    def update_appointment(self, appt_id: int, appointment: Appointment) -> Optional[Appointment]:
+    def update_appointment(self, appt_id: int, appointment: Appointment):
         return self.appointment_repo.update(appt_id, appointment)
 
-    def delete_appointment(self, appt_id: int) -> bool:
+    def delete_appointment(self, appt_id: int):
         return self.appointment_repo.delete(appt_id)
 
-    def get_appointment_detail(self, appt_id: int) -> Optional[AppointmentDetail]:
-        appointment = self.appointment_repo.find_by_id(appt_id)
-        if appointment is None:
+    def get_appointment_detail(self, appt_id: int):
+        appt = self.appointment_repo.find_by_id(appt_id)
+        if appt is None:
             return None
 
-        patient = self.patient_repo.find_by_id(appointment.patient_id)
-        provider = self.provider_repo.find_by_id(appointment.provider_id)
+        patient = self.patient_repo.find_by_id(appt.patient_id)
+        provider = self.provider_repo.find_by_id(appt.provider_id)
 
-        return AppointmentDetail(
-            appointment=appointment,
-            patient=patient,
-            provider=provider,
-        )
+        return AppointmentDetail(appointment=appt, patient=patient, provider=provider)
 
-    def get_upcoming_appointments(self) -> list[AppointmentDetail]:
+    def get_upcoming_appointments(self):
         today = date.today()
-        all_appointments = self.appointment_repo.find_all()
-
-        upcoming = [
-            appt for appt in all_appointments
-            if appt.appt_date >= today and appt.status == 'scheduled'
-        ]
+        all_appts = self.appointment_repo.find_all()
 
         result = []
-        for appt in upcoming:
-            patient = self.patient_repo.find_by_id(appt.patient_id)
-            provider = self.provider_repo.find_by_id(appt.provider_id)
-            result.append(AppointmentDetail(
-                appointment=appt,
-                patient=patient,
-                provider=provider,
-            ))
+        for appt in all_appts:
+            if appt.appt_date >= today and appt.status == 'scheduled':
+                patient = self.patient_repo.find_by_id(appt.patient_id)
+                provider = self.provider_repo.find_by_id(appt.provider_id)
+                result.append(AppointmentDetail(
+                    appointment=appt,
+                    patient=patient,
+                    provider=provider
+                ))
 
         return result
 
-    def get_provider_schedule(self, provider_id: int) -> list[AppointmentDetail]:
+    def get_provider_schedule(self, provider_id: int):
         today = date.today()
-        all_appointments = self.appointment_repo.find_all()
-
+        all_appts = self.appointment_repo.find_all()
         provider = self.provider_repo.find_by_id(provider_id)
-        provider_appointments = [
-            appt for appt in all_appointments
-            if appt.provider_id == provider_id
-            and appt.appt_date >= today
-            and appt.status == 'scheduled'
-        ]
 
         result = []
-        for appt in provider_appointments:
-            patient = self.patient_repo.find_by_id(appt.patient_id)
-            result.append(AppointmentDetail(
-                appointment=appt,
-                patient=patient,
-                provider=provider,
-            ))
+        for appt in all_appts:
+            if (appt.provider_id == provider_id
+                    and appt.status == 'scheduled'
+                    and appt.appt_date >= today):
+                patient = self.patient_repo.find_by_id(appt.patient_id)
+                result.append(AppointmentDetail(
+                    appointment=appt,
+                    patient=patient,
+                    provider=provider
+                ))
 
         return result
 
-    def get_appointments_by_date(self, target_date: date) -> list[AppointmentDetail]:
-        all_appointments = self.appointment_repo.find_all()
-
-        date_appointments = [
-            appt for appt in all_appointments
-            if appt.appt_date == target_date
-        ]
+    def get_appointments_by_date(self, target_date: date):
+        all_appts = self.appointment_repo.find_all()
 
         result = []
-        for appt in date_appointments:
-            patient = self.patient_repo.find_by_id(appt.patient_id)
-            provider = self.provider_repo.find_by_id(appt.provider_id)
-            result.append(AppointmentDetail(
-                appointment=appt,
-                patient=patient,
-                provider=provider,
-            ))
+        for appt in all_appts:
+            if appt.appt_date == target_date:
+                patient = self.patient_repo.find_by_id(appt.patient_id)
+                provider = self.provider_repo.find_by_id(appt.provider_id)
+                result.append(AppointmentDetail(
+                    appointment=appt,
+                    patient=patient,
+                    provider=provider
+                ))
 
         return result
 
-    def cancel_appointment(self, appt_id: int) -> Optional[Appointment]:
-        appointment = self.appointment_repo.find_by_id(appt_id)
-        if appointment is None:
+    def cancel_appointment(self, appt_id: int):
+        appt = self.appointment_repo.find_by_id(appt_id)
+        if appt is None:
             return None
 
-        # Create updated appointment with cancelled status
-        cancelled = Appointment(
-            appt_id=appointment.appt_id,
-            patient_id=appointment.patient_id,
-            provider_id=appointment.provider_id,
-            appt_date=appointment.appt_date,
-            appt_time=appointment.appt_time,
-            duration=appointment.duration,
+        # build a new Appointment object with status flipped to cancelled
+        updated = Appointment(
+            appt_id=appt.appt_id,
+            patient_id=appt.patient_id,
+            provider_id=appt.provider_id,
+            appt_date=appt.appt_date,
+            appt_time=appt.appt_time,
+            duration=appt.duration,
             status='cancelled',
-            appt_type=appointment.appt_type,
-            reason=appointment.reason,
-            notes=appointment.notes,
+            appt_type=appt.appt_type,
+            reason=appt.reason,
+            notes=appt.notes,
         )
-        return self.appointment_repo.update(appt_id, cancelled)
+        return self.appointment_repo.update(appt_id, updated)
