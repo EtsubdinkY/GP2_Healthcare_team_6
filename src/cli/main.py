@@ -154,7 +154,7 @@ def add_patient(svc):
         state = get_input("State: ").upper()
     zipcode = get_input("ZIP: ")
 
-    # the db enum only accepts these exact values (case sensitive), took a while to figure out
+    # the db enum only accepts these exact values (case sensitive)
     comm = get_input("Communication Preference (Email/Phone/Mail/Portal): ")
     while comm not in ['Email', 'Phone', 'Mail', 'Portal']:
         print("please enter exactly: Email, Phone, Mail, or Portal")
