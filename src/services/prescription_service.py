@@ -21,121 +21,116 @@ class PrescriptionDetail:
 
 
 class PrescriptionService:
-    def __init__(self) -> None:
+
+    def __init__(self):
         self.prescription_repo = PrescriptionRepository()
         self.patient_repo = PatientRepository()
         self.provider_repo = ProviderRepository()
         self.medication_repo = MedicationRepository()
 
-    def get_all_prescriptions(self) -> list[Prescription]:
+    def get_all_prescriptions(self):
         return self.prescription_repo.find_all()
 
-    def get_prescription_by_id(self, rx_id: int) -> Optional[Prescription]:
+    def get_prescription_by_id(self, rx_id: int):
         return self.prescription_repo.find_by_id(rx_id)
 
-    def create_prescription(self, prescription: Prescription) -> Prescription:
+    def create_prescription(self, prescription: Prescription):
         return self.prescription_repo.create(prescription)
 
-    def update_prescription(self, rx_id: int, prescription: Prescription) -> Optional[Prescription]:
+    def update_prescription(self, rx_id: int, prescription: Prescription):
         return self.prescription_repo.update(rx_id, prescription)
 
-    def delete_prescription(self, rx_id: int) -> bool:
+    def delete_prescription(self, rx_id: int):
         return self.prescription_repo.delete(rx_id)
 
-    def get_prescription_detail(self, rx_id: int) -> Optional[PrescriptionDetail]:
-        prescription = self.prescription_repo.find_by_id(rx_id)
-        if prescription is None:
+    def get_prescription_detail(self, rx_id: int):
+        rx = self.prescription_repo.find_by_id(rx_id)
+        if rx is None:
             return None
 
-        patient = self.patient_repo.find_by_id(prescription.patient_id)
-        provider = self.provider_repo.find_by_id(prescription.provider_id)
-        medication = self.medication_repo.find_by_id(prescription.med_id)
+        patient = self.patient_repo.find_by_id(rx.patient_id)
+        provider = self.provider_repo.find_by_id(rx.provider_id)
+        med = self.medication_repo.find_by_id(rx.med_id)
 
-        return PrescriptionDetail(
-            prescription=prescription,
-            patient=patient,
-            provider=provider,
-            medication=medication,
-        )
+        return PrescriptionDetail(prescription=rx, patient=patient, provider=provider, medication=med)
 
-    def get_patient_prescriptions(self, patient_id: int) -> list[PrescriptionDetail]:
-        all_prescriptions = self.prescription_repo.find_all()
-
+    def get_patient_prescriptions(self, patient_id: int):
+        all_rxs = self.prescription_repo.find_all()
         patient = self.patient_repo.find_by_id(patient_id)
-        patient_rxs = [
-            rx for rx in all_prescriptions
-            if rx.patient_id == patient_id
-        ]
 
         result = []
-        for rx in patient_rxs:
+        for rx in all_rxs:
+            if rx.patient_id != patient_id:
+                continue
             provider = self.provider_repo.find_by_id(rx.provider_id)
-            medication = self.medication_repo.find_by_id(rx.med_id)
+            med = self.medication_repo.find_by_id(rx.med_id)
             result.append(PrescriptionDetail(
                 prescription=rx,
                 patient=patient,
                 provider=provider,
-                medication=medication,
+                medication=med
             ))
 
         return result
 
-    def get_active_prescriptions(self) -> list[PrescriptionDetail]:
-        all_prescriptions = self.prescription_repo.find_all()
-
-        active = [rx for rx in all_prescriptions if rx.status == 'active']
+    def get_active_prescriptions(self):
+        all_rxs = self.prescription_repo.find_all()
 
         result = []
-        for rx in active:
+        for rx in all_rxs:
+            if rx.status != 'active':
+                continue
             patient = self.patient_repo.find_by_id(rx.patient_id)
             provider = self.provider_repo.find_by_id(rx.provider_id)
-            medication = self.medication_repo.find_by_id(rx.med_id)
+            med = self.medication_repo.find_by_id(rx.med_id)
             result.append(PrescriptionDetail(
                 prescription=rx,
                 patient=patient,
                 provider=provider,
-                medication=medication,
+                medication=med
             ))
 
         return result
 
-    def get_controlled_substances(self) -> list[PrescriptionDetail]:
-        all_prescriptions = self.prescription_repo.find_all()
-
-        controlled = [rx for rx in all_prescriptions if rx.is_controlled]
+    def get_controlled_substances(self):
+        # returns all prescriptions which are flagged as controlled substances
+        all_rxs = self.prescription_repo.find_all()
 
         result = []
-        for rx in controlled:
+        for rx in all_rxs:
+            if not rx.is_controlled:
+                continue
             patient = self.patient_repo.find_by_id(rx.patient_id)
             provider = self.provider_repo.find_by_id(rx.provider_id)
-            medication = self.medication_repo.find_by_id(rx.med_id)
+            med = self.medication_repo.find_by_id(rx.med_id)
             result.append(PrescriptionDetail(
                 prescription=rx,
                 patient=patient,
                 provider=provider,
-                medication=medication,
+                medication=med
             ))
 
         return result
 
-    def discontinue_prescription(self, rx_id: int) -> Optional[Prescription]:
-        prescription = self.prescription_repo.find_by_id(rx_id)
-        if prescription is None:
+    def discontinue_prescription(self, rx_id: int):
+        rx = self.prescription_repo.find_by_id(rx_id)
+        if rx is None:
             return None
 
-        discontinued = Prescription(
-            rx_id=prescription.rx_id,
-            patient_id=prescription.patient_id,
-            provider_id=prescription.provider_id,
-            med_id=prescription.med_id,
-            date_written=prescription.date_written,
-            dosage=prescription.dosage,
-            frequency=prescription.frequency,
-            quantity=prescription.quantity,
-            refills=prescription.refills,
-            is_controlled=prescription.is_controlled,
-            controlled_substance_schedule=prescription.controlled_substance_schedule,
-            prescriber_dea_number=prescription.prescriber_dea_number,
+        # copy the prescription over but change the status
+        updated = Prescription(
+            rx_id=rx.rx_id,
+            patient_id=rx.patient_id,
+            provider_id=rx.provider_id,
+            med_id=rx.med_id,
+            date_written=rx.date_written,
+            dosage=rx.dosage,
+            frequency=rx.frequency,
+            quantity=rx.quantity,
+            refills=rx.refills,
+            is_controlled=rx.is_controlled,
+            controlled_substance_schedule=rx.controlled_substance_schedule,
+            prescriber_dea_number=rx.prescriber_dea_number,
             status='discontinued',
         )
-        return self.prescription_repo.update(rx_id, discontinued)
+        return self.prescription_repo.update(rx_id, updated)
