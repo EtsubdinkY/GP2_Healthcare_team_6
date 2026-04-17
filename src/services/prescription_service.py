@@ -93,7 +93,7 @@ class PrescriptionService:
         return result
 
     def get_controlled_substances(self):
-        # returns all prescriptions which are flagged as controlled substances
+        # returns all prescriptions flagged as controlled substances
         all_rxs = self.prescription_repo.find_all()
 
         result = []
@@ -131,6 +131,6 @@ class PrescriptionService:
             is_controlled=rx.is_controlled,
             controlled_substance_schedule=rx.controlled_substance_schedule,
             prescriber_dea_number=rx.prescriber_dea_number,
-            status='discontinued',
+            status='cancelled',
         )
         return self.prescription_repo.update(rx_id, updated)
