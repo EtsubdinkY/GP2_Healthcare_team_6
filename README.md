@@ -1,6 +1,6 @@
-# Healthcare Management System
+# GP2 Healthcare Management System
 
-A PostgreSQL-based healthcare management application with a Python CLI interface for managing patients, appointments, and prescriptions.
+This is our team's submission for GP2 — a PostgreSQL-backed healthcare app with a Python CLI for handling patients, appointments, and prescriptions.
 
 ## Team 6
 
@@ -9,88 +9,88 @@ A PostgreSQL-based healthcare management application with a Python CLI interface
 - Adyasha Mishra
 - Etsubdink Workalemahu Yergashewa
 
-## Prerequisites
+## What You Need Before Starting
 
-- Python 3.10 or higher
-- PostgreSQL 14 or higher
-- pip (Python package manager)
+- Python 3.10+
+- PostgreSQL 14+
+- pip
 
-## Project Structure
+## How the Project Is Organized
 
 ```
 GP2_Healthcare_team_6/
 ├── postgresql/
-│   ├── schema.sql          # Database schema with tables, constraints, triggers
-│   ├── data.sql            # Synthetic test data
-│   └── queries.sql         # 8+ clinical/operational SQL queries
+│   ├── schema.sql          # all the tables, constraints, triggers
+│   ├── data.sql            # test data we generated
+│   └── queries.sql         # the 8 SQL queries
 ├── src/
 │   ├── config/
-│   │   └── database.py     # Connection pooling configuration
+│   │   └── database.py     # sets up connection pooling
 │   ├── models/
-│   │   ├── patient.py      # Patient dataclass
-│   │   ├── appointment.py  # Appointment dataclass
-│   │   ├── prescription.py # Prescription dataclass
-│   │   ├── provider.py     # Provider dataclass
-│   │   ├── medication.py   # Medication dataclass
-│   │   ├── hospital.py     # Hospital dataclass
-│   │   └── patient_insurance.py  # Insurance dataclass
+│   │   ├── patient.py
+│   │   ├── appointment.py
+│   │   ├── prescription.py
+│   │   ├── provider.py
+│   │   ├── medication.py
+│   │   ├── hospital.py
+│   │   └── patient_insurance.py
 │   ├── repositories/
-│   │   ├── base_repository.py    # Base CRUD operations
-│   │   ├── patient_repo.py       # Full CRUD for patients
-│   │   ├── appointment_repo.py   # Full CRUD for appointments
-│   │   ├── prescription_repo.py  # Full CRUD for prescriptions
-│   │   ├── provider_repo.py      # Read-only for providers
-│   │   ├── patient_insurance_repo.py  # Read-only for insurance
-│   │   ├── medication_repo.py    # Read-only for medications
-│   │   └── hospital_repo.py      # Read-only for hospitals
+│   │   ├── base_repository.py
+│   │   ├── patient_repo.py
+│   │   ├── appointment_repo.py
+│   │   ├── prescription_repo.py
+│   │   ├── provider_repo.py
+│   │   ├── patient_insurance_repo.py
+│   │   ├── medication_repo.py
+│   │   └── hospital_repo.py
 │   ├── services/
-│   │   ├── patient_service.py    # Patient business logic
-│   │   ├── appointment_service.py # Appointment business logic
-│   │   └── prescription_service.py # Prescription business logic
+│   │   ├── patient_service.py
+│   │   ├── appointment_service.py
+│   │   └── prescription_service.py
 │   └── cli/
-│       └── main.py         # Menu-driven CLI application
-├── tests/                  # Optional test files
-├── requirements.txt        # Python dependencies
-├── .env.example           # Environment variables template
-└── README.md              # This file
+│       └── main.py
+├── tests/
+├── requirements.txt
+├── .env.example
+└── README.md
 ```
 
-## Installation
+## Setup Instructions
 
-### 1. Clone the Repository
+### Step 1 — Clone the repo
 
 ```bash
 git clone https://github.com/EtsubdinkY/GP2_Healthcare_team_6.git
 cd GP2_Healthcare_team_6
 ```
 
-### 2. Create Virtual Environment (Recommended)
+### Step 2 — Set up a virtual environment (recommended)
 
 ```bash
 python -m venv venv
 
-# Windows
+# on Windows:
 venv\Scripts\activate
 
-# macOS/Linux
+# on Mac/Linux:
 source venv/bin/activate
 ```
 
-### 3. Install Dependencies
+### Step 3 — Install the dependencies
 
 ```bash
 pip install -r requirements.txt
 ```
 
-### 4. Configure Environment Variables
+### Step 4 — Set up your environment variables
 
-Copy the example environment file and update with your database credentials:
+Copy `.env.example` to `.env` and fill in your own database info:
 
 ```bash
 cp .env.example .env
 ```
 
-Edit `.env` with your PostgreSQL connection details:
+The `.env` file should look something like this:
 
 ```
 DB_HOST=localhost
@@ -102,107 +102,90 @@ DB_POOL_MIN_SIZE=1
 DB_POOL_MAX_SIZE=5
 ```
 
-### 5. Set Up the Database
-
-Create the database and load the schema:
+### Step 5 — Create and load the database
 
 ```bash
-# Connect to PostgreSQL
 psql -U postgres
+```
 
-# Create database
+Inside psql:
+
+```sql
 CREATE DATABASE healthcare_management;
-
-# Exit psql
 \q
+```
 
-# Load schema
+Then from your terminal:
+
+```bash
 psql -U postgres -d healthcare_management -f postgresql/schema.sql
-
-# Load sample data
 psql -U postgres -d healthcare_management -f postgresql/data.sql
 ```
 
-## Running the Application
+## Running It
 
-From the project root directory:
+From the project root:
 
 ```bash
 python -m src.cli.main
 ```
 
-## CLI Features
+## What the CLI Can Do
 
-### Main Menu
-1. **Patient Management** - Full CRUD operations for patients
-2. **Appointment Management** - Schedule, update, cancel appointments
-3. **Prescription Management** - Manage prescriptions and medications
-4. **Quick Views** - Upcoming appointments, active prescriptions, polypharmacy risk
+The main menu has four sections:
 
-### Patient Management
-- List all patients
-- View patient details
-- View patient dashboard (demographics, insurance, prescriptions, appointments)
-- Add, update, delete patients
-- Search patients by name
-- Polypharmacy risk report (5+ active prescriptions)
+**1. Patient Management**
+- list patients, view details, see full dashboard
+- add / update / delete patients
+- search by name
+- polypharmacy risk report (patients on 5+ active meds)
 
-### Appointment Management
-- List all appointments
-- View appointment details with patient/provider info
-- View upcoming scheduled appointments
-- Schedule new appointments
-- Update or cancel appointments
-- View appointments by date
+**2. Appointment Management**
+- list and view appointments
+- see upcoming scheduled ones
+- schedule new, update, or cancel existing
+- filter by date
 
-### Prescription Management
-- List all prescriptions
-- View prescription details with medication/patient/provider info
-- View active prescriptions
-- Create, update, discontinue prescriptions
-- View patient prescription history
-- Controlled substances report (DEA compliance)
+**3. Prescription Management**
+- list and view prescriptions
+- create, update, discontinue
+- patient prescription history
+- controlled substances report
 
-## SQL Queries
+**4. Quick Views**
+- upcoming appointments
+- active prescriptions
+- polypharmacy flag
 
-The `postgresql/queries.sql` file contains 8 documented queries:
+## The SQL Queries
 
-1. **Patient Care Coordination** - Demographics, insurance, active prescriptions for arriving patients
-2. **Medication Safety** - Polypharmacy risk detection (5+ active prescriptions)
-3. **Provider Workload** - Upcoming appointments per provider
-4. **Insurance Coverage Summary** - Coverage statistics by plan
-5. **Prescription Cost Analysis** - Cost and coverage breakdown
-6. **Provider Productivity** - Appointment metrics by provider
-7. **Controlled Substances Report** - Schedule II DEA reporting
-8. **Appointment Status by Facility** - Status breakdown per facility
+`postgresql/queries.sql` has 8 queries:
 
-## Architecture
+1. Patient care coordination — pulls demographics, insurance, and active meds for incoming patients
+2. Polypharmacy risk — flags patients on 5 or more active prescriptions
+3. Provider workload — counts upcoming appointments per provider
+4. Insurance coverage breakdown by plan
+5. Prescription cost and coverage analysis
+6. Provider productivity metrics
+7. Controlled substances report (Schedule II, DEA)
+8. Appointment status breakdown by facility
 
-### Layered Architecture
+## Architecture Notes
 
-- **Config Layer** (`config/database.py`): Connection pooling with psycopg3
-- **Model Layer** (`models/`): Python dataclasses mirroring database tables
-- **Repository Layer** (`repositories/`): Data access with parameterized queries
-- **Service Layer** (`services/`): Business logic combining multiple repositories
-- **CLI Layer** (`cli/`): User interface with menu-driven navigation
+We went with a layered approach:
 
-### Design Patterns
+- **Config** — connection pool setup via psycopg3
+- **Models** — Python dataclasses that mirror the DB tables, each with a `from_row()` method
+- **Repositories** — one per table, handles all SQL; patients/appointments/prescriptions are full CRUD, the rest are read-only
+- **Services** — business logic lives here, calls into multiple repos as needed
+- **CLI** — menu-driven interface, calls into the service layer
 
-- **Repository Pattern**: Abstracts database operations from business logic
-- **Service Layer**: Encapsulates business rules and coordinates repositories
-- **Dataclass Models**: Type-safe domain objects with `from_row()` factory methods
-- **Connection Pooling**: Efficient database connection management
+## Python Dependencies
 
-## Dependencies
+- `psycopg[binary]` 3.1.18
+- `psycopg-pool` 3.2.2
+- `python-dotenv` 1.0.1
 
-- `psycopg[binary]` (3.1.18) - PostgreSQL adapter for Python
-- `psycopg-pool` (3.2.2) - Connection pooling
-- `python-dotenv` (1.0.1) - Environment variable management
+## A Note on Security
 
-## Security Notes
-
-- Database credentials are stored in `.env` (never committed to git)
-- All SQL queries use parameterized statements to prevent SQL injection
-- Sensitive data (SSN) is optional and should be handled according to HIPAA guidelines
-- This is a demonstration project using synthetic data only
-
+Credentials stay in `.env` which is gitignored. All queries use parameterized statements (no string formatting into SQL). SSN fields are optional. This project only uses synthetic data — nothing real.
