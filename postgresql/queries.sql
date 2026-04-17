@@ -47,6 +47,19 @@ GROUP BY
     ip.payer_name, ip.plan_type, pi.policy_number, pi.coverage_type, pi.copay
 ORDER BY a.appt_date, a.appt_time, patient_name;
 
+-- Expected Output: Appointment ID/date/time, patient demographics, insurance plan details,
+-- copay, and a semicolon-separated list of active prescriptions.
+-- Sample Results:
+-- +---------+------------+----------+------------------+------------------------+-------+----------------------+
+-- | appt_id | appt_date  | appt_time| patient_name     | payer_name             | copay | active_prescriptions |
+-- +---------+------------+----------+------------------+------------------------+-------+----------------------+
+-- | 1       | 2025-09-01 | 08:00:00 | James Smith      | Blue Cross Blue Shield | 20.00 | Lipitor              |
+-- | 2       | 2025-09-02 | 08:15:00 | Patricia Brown   | Aetna                  | 25.00 | Hydrocortisone Cream |
+-- | 3       | 2025-09-03 | 08:30:00 | Robert Miller    | UnitedHealthcare       | 30.00 | No prescriptions     |
+-- | 4       | 2025-09-04 | 08:45:00 | Linda Martinez   | Cigna                  | 35.00 | Amoxicillin          |
+-- | 5       | 2025-09-05 | 08:00:00 | William Gonzalez | Kaiser Permanente      | 40.00 | Amlodipine           |
+-- +---------+------------+----------+------------------+------------------------+-------+----------------------+
+
 
 -- Query #2: Medication Safety - Polypharmacy Risk
 -- Clinical/Financial/Operational Context: Identifies patients with 5 or more active prescriptions,
@@ -74,6 +87,14 @@ GROUP BY p.patient_id, p.mrn, p.first_name, p.last_name
 HAVING COUNT(rx.rx_id) >= 5
 ORDER BY active_prescription_count DESC, patient_name;
 
+-- Expected Output: Patients with five or more active prescriptions, plus the unique providers prescribing them.
+-- Sample Results:
+-- +------------+------------+--------------+---------------------------+---------------------------------------------------------------------------+
+-- | patient_id |    mrn     | patient_name | active_prescription_count |                           prescribing_providers                           |
+-- +------------+------------+--------------+---------------------------+---------------------------------------------------------------------------+
+-- |          1 | 0000000001 | James Smith  |                         6 | John Johnson, Kelly Mbenga, Michael Brown, Robert Williams, William Jones |
+-- +------------+------------+--------------+---------------------------+---------------------------------------------------------------------------+
+
 -- Query #3: Provider Workload - Upcoming Appointments
 -- Clinical/Financial/Operational Context: Helps providers and schedulers view upcoming patient visits,
 -- visit types, and reasons for visit.
@@ -100,6 +121,16 @@ WHERE a.appt_date >= CURRENT_DATE
   AND a.status IN ('scheduled', 'checked_in')
 ORDER BY pr.provider_id, a.appt_date, a.appt_time;
 
+-- Expected Output: Upcoming scheduled/checked-in appointments by provider, date/time, patient, type, and reason.
+-- Sample Results:
+-- +-------------+-----------------+---------------------+---------+------------+-----------+----------------+--------------+-------------------+------------+
+-- | provider_id |  provider_name  |     speciality      | appt_id | appt_date  | appt_time |  patient_name  |  appt_type   |      reason       |   status   |
+-- +-------------+-----------------+---------------------+---------+------------+-----------+----------------+--------------+-------------------+------------+
+-- |           1 | Kelly Mbenga    | Cardiologist        |     221 | 2026-04-20 | 09:00:00  | James Smith    | Follow-up    | Routine follow-up | scheduled  |
+-- |           2 | John Johnson    | Emergency Physician |     222 | 2026-04-22 | 10:00:00  | Patricia Brown | Consultation | Medication review | checked_in |
+-- |           3 | Robert Williams | Neurologist         |     223 | 2026-04-25 | 11:00:00  | Robert Miller  | New Patient  | Initial check     | scheduled  |
+-- +-------------+-----------------+---------------------+---------+------------+-----------+----------------+--------------+-------------------+------------+
+
 -- Query #4: Insurance Coverage Summary
 -- Financial/Operational Context: Summarizes each insurance payer’s covered patients and average copay.
 -- Useful for payer-mix and reimbursement planning.
@@ -117,6 +148,18 @@ JOIN patient_insurance pi
 WHERE pi.end_date IS NULL OR pi.end_date >= CURRENT_DATE
 GROUP BY ip.payer_name, ip.plan_type
 ORDER BY covered_patients DESC, ip.payer_name, ip.plan_type;
+
+-- Expected Output: Insurance payer, plan type, number of currently covered patients, and average copay amount.
+-- Sample Results:
+-- +------------------------+-----------+------------------+---------+
+-- | payer_name             | plan_type | covered_patients | avg_copay |
+-- +------------------------+-----------+------------------+-----------+
+-- | Aetna                  | HMO       |               17 |     30.29 |
+-- | Blue Cross Blue Shield | PPO       |               17 |     29.71 |
+-- | CareFirst              | PPO       |               16 |     30.00 |
+-- | Cigna                  | EPO       |               16 |     30.31 |
+-- | Humana                 | PPO       |               16 |     29.38 |
+-- +------------------------+-----------+------------------+-----------+
 
 
 -- Query #5: Prescription Costs / Coverage View
@@ -151,6 +194,18 @@ LEFT JOIN insurance_plan ip
 WHERE rx.status = 'active'
 ORDER BY patient_name, medication_name;
 
+-- Expected Output: Patient, medication, dosage/frequency, date written, insurance payer/plan, policy number, copay, and active prescription status.
+-- Sample Results:
+-- +------------+----------------+---------------------------+--------+-------------+--------------+------------------+-----------+---------------+-------+--------+
+-- | patient_id | patient_name   | medication_name           | dosage | frequency   | date_written | payer_name       | plan_type | policy_number | copay | status |
+-- +------------+----------------+---------------------------+--------+-------------+--------------+------------------+-----------+---------------+-------+--------+
+-- | 22         | Amanda Wilson  | Hydrocodone-Acetaminophen | 100 mg | Twice daily | 2025-09-22   | Humana           | PPO       | POL-00022     | 25.00 | active |
+-- | 19         | Andrew Jones   | Azithromycin              | 20 mg  | At bedtime  | 2025-09-19   | UnitedHealthcare | PPO       | POL-00019     | 35.00 | active |
+-- | 32         | Angela Baker   | Lisinopril                | 100 mg | Twice daily | 2026-01-20   | CareFirst        | PPO       | POL-00032     | 25.00 | active |
+-- | 82         | Angela Baker   | Tramadol                  | 10 mg  | Twice daily | 2025-11-21   | Aetna            | HMO       | POL-00082     | 25.00 | active |
+-- | 16         | Ashley Rivera  | Omeprazole                | 500 mg | Once daily  | 2025-09-16   | CareFirst        | PPO       | POL-00016     | 20.00 | active |
+-- +------------+----------------+---------------------------+--------+-------------+--------------+------------------+-----------+---------------+-------+--------+
+
 
 -- Query #6: Provider Productivity
 -- Operational Context: Measures provider activity, no-show rates, and average patients seen per appointment day.
@@ -176,6 +231,18 @@ LEFT JOIN appointment a
     ON pr.provider_id = a.provider_id
 GROUP BY pr.provider_id, pr.first_name, pr.last_name, pr.speciality
 ORDER BY total_appointments DESC, provider_name;
+
+-- Expected Output: Provider productivity summary with total appointments, no-show counts, no-show rate, and average patients per day.
+-- Sample Results:
+-- +-------------+------------------+---------------------+--------------------+---------------+------------------+----------------------+
+-- | provider_id |  provider_name   |     speciality      | total_appointments | no_show_count | no_show_rate_pct | avg_patients_per_day |
+-- +-------------+------------------+---------------------+--------------------+---------------+------------------+----------------------+
+-- |          10 | Charles Martinez | Dermatologist       |                  7 |             7 |           100.00 |                 1.00 |
+-- |           6 | David Garcia     | Internist           |                  7 |             0 |             0.00 |                 1.00 |
+-- |           2 | John Johnson     | Emergency Physician |                  7 |             0 |             0.00 |                 1.00 |
+-- |           8 | Joseph Davis     | Registered Nurse    |                  7 |             0 |             0.00 |                 1.00 |
+-- |           1 | Kelly Mbenga     | Cardiologist        |                  7 |             0 |             0.00 |                 1.00 |
+-- +-------------+------------------+---------------------+--------------------+---------------+------------------+----------------------+
 
 
 
@@ -209,6 +276,18 @@ WHERE rx.is_controlled = TRUE
   AND rx.controlled_substance_schedule = 'Schedule II'
 ORDER BY provider_name, rx.date_written, patient_name;
 
+-- Expected Output: Schedule II controlled substance prescriptions with DEA details, patient, medication, quantity, and status.
+-- Sample Results:
+-- +-------+--------------+-------------+-----------------+------------+-----------------------+------------+-----------------+-----------------+--------+----------+-----------+
+-- | rx_id | date_written | provider_id |  provider_name  | dea_number | prescriber_dea_number | patient_id |  patient_name   | medication_name | dosage | quantity |  status   |
+-- +-------+--------------+-------------+-----------------+------------+-----------------------+------------+-----------------+-----------------+--------+----------+-----------+
+-- |    14 | 2025-09-14   |          14 | Anthony Wilson  | RL1000014  | RL1000014             |         14 | Margaret Flores | Adderall XR     | 100 mg |       14 | completed |
+-- |    84 | 2025-11-23   |          14 | Anthony Wilson  | RL1000014  | RL1000014             |         84 | Brenda Roberts  | Adderall XR     | 25 mg  |       90 | cancelled |
+-- |   119 | 2025-12-28   |          14 | Anthony Wilson  | RL1000014  | RL1000014             |          9 | Thomas Harris   | Adderall XR     | 250 mg |       60 | completed |
+-- |    26 | 2025-09-26   |          26 | Barbara Sanchez | GY1000026  | GY1000026             |         26 | Rebecca Sanchez | Methylphenidate | 10 mg  |       14 | completed |
+-- |    96 | 2025-12-05   |          26 | Barbara Sanchez | GY1000026  | GY1000026             |         96 | Victoria Scott  | Methylphenidate | 500 mg |       90 | cancelled |
+-- +-------+--------------+-------------+-----------------+------------+-----------------------+------------+-----------------+-----------------+--------+----------+-----------+
+
 
 -- Query #8: Appointment Status Breakdown by Facility
 -- Operational Context: Shows appointment outcomes by facility for capacity, scheduling,
@@ -238,3 +317,61 @@ JOIN hospital h
 GROUP BY h.hospital_id, h.name, h.facility_type
 ORDER BY h.name;
 
+-- Expected Output: Facility-level appointment status totals with completed, no-show, cancelled, scheduled, and checked-in counts.
+-- Sample Results:
+-- +-------------+---------------------------+---------------+--------------------+-----------------+---------------+-----------------+-----------------+------------------+
+-- | hospital_id |       facility_name       | facility_type | total_appointments | completed_count | no_show_count | cancelled_count | scheduled_count | checked_in_count |
+-- +-------------+---------------------------+---------------+--------------------+-----------------+---------------+-----------------+-----------------+------------------+
+-- |           3 | Chicago Central Hospital  | Hospital      |                 26 |               0 |            13 |               0 |              13 |                0 |
+-- |          13 | Desert Oasis Clinic       | Clinic        |                  6 |               6 |             0 |               0 |               0 |                0 |
+-- |           6 | Downtown Community Clinic | Clinic        |                 12 |               0 |             0 |               0 |              12 |                0 |
+-- |          10 | Eastside Urgent Care      | Clinic        |                 12 |               0 |            12 |               0 |               0 |                0 |
+-- |          11 | Harbor View Clinic        | Clinic        |                  6 |               0 |             0 |               0 |               6 |                0 |
+-- +-------------+---------------------------+---------------+--------------------+-----------------+---------------+-----------------+-----------------+------------------+
+
+-- Query #9: High-Risk Patients by Allergy Severity and Emergency Contact
+-- Clinical/Financial/Operational Context: Helps clinical staff quickly identify patients
+-- with high-risk allergies and confirm whether an emergency contact is available,
+-- improving safety during treatment and emergency response.
+-- Tables Used: patient, allergy, emergency_contact
+-- Complexity Features: JOINs, LEFT JOIN, CASE expression, filtering, ordering
+
+SELECT
+    p.patient_id,
+    p.mrn,
+    p.first_name || ' ' || p.last_name AS patient_name,
+    a.allergen,
+    a.reaction,
+    a.severity,
+    CASE
+        WHEN ec.contact_id IS NOT NULL THEN 'Yes'
+        ELSE 'No'
+    END AS has_emergency_contact,
+    ec.name AS emergency_contact_name,
+    ec.relationship,
+    ec.phone AS emergency_contact_phone
+FROM patient p
+JOIN allergy a
+    ON p.patient_id = a.patient_id
+LEFT JOIN emergency_contact ec
+    ON p.patient_id = ec.patient_id
+WHERE a.severity IN ('High', 'Critical')
+ORDER BY a.severity DESC, patient_name;
+
+-- Expected Output:
+-- The result displays patients who have high or critical allergies, including
+-- patient ID, MRN, patient full name, allergen, reaction, allergy severity,
+-- whether an emergency contact exists, and the emergency contact’s name,
+-- relationship, and phone number.
+-- Sample Results:
+-- +------------+------------+----------------+-----------+-------------+----------+-----------------------+------------------------+--------------+-------------------------+
+-- | patient_id |    mrn     |  patient_name  | allergen  |  reaction   | severity | has_emergency_contact | emergency_contact_name | relationship | emergency_contact_phone |
+-- +------------+------------+----------------+-----------+-------------+----------+-----------------------+------------------------+--------------+-------------------------+
+-- |         72 | 0000000072 | Amanda Wilson  | Peanuts   | Swelling    | Critical | Yes                   | Contact 72 Lewis       | Parent       | 555-5071                |
+-- |         22 | 0000000022 | Amanda Wilson  | Peanuts   | Anaphylaxis | Critical | Yes                   | Contact 22 Lewis       | Spouse       | 555-5021                |
+-- |         32 | 0000000032 | Angela Baker   | Peanuts   | Sneezing    | Critical | Yes                   | Contact 32 Hill        | Sibling      | 555-5031                |
+-- |         16 | 0000000016 | Ashley Rivera  | Ibuprofen | Swelling    | Critical | Yes                   | Contact 16 Thompson    | Parent       | 555-5015                |
+-- |          6 | 0000000006 | Barbara Thomas | Ibuprofen | Sneezing    | Critical | Yes                   | Contact 6 Gonzalez     | Guardian     | 555-5005                |
+-- +------------+------------+----------------+-----------+-------------+----------+-----------------------+------------------------+--------------+-------------------------+
+
+-
