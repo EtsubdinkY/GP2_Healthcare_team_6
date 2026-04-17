@@ -57,6 +57,7 @@
   - `AppointmentService` — scheduling, cancellation, provider schedule view, date filtering
   - `PrescriptionService` — active/controlled substance reports, discontinuation
 - Built the menu-driven CLI in `cli/main.py` with four main sections and input validation
+- Added color-coded terminal output to make results easier to read
 - Wrote the README and this contributions file
 
 **Contribution: 25%**
