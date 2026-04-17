@@ -1,5 +1,6 @@
 #!/usr/bin/env python3
 import sys
+import re
 from datetime import date, time
 
 from src.config.database import close_pool
@@ -7,12 +8,14 @@ from src.models import Patient, Appointment, Prescription
 from src.services import PatientService, AppointmentService, PrescriptionService
 
 
+# helper functions for input
+
 def get_input(prompt, required=True):
     while True:
-        value = input(prompt).strip()
-        if value or not required:
-            return value
-        print("This field is required!")
+        val = input(prompt).strip()
+        if val or not required:
+            return val
+        print("this field is required")
 
 
 def get_int(prompt):
@@ -20,7 +23,7 @@ def get_int(prompt):
         try:
             return int(input(prompt).strip())
         except ValueError:
-            print("Enter a valid number")
+            print("please enter a number")
 
 
 def get_date(prompt):
@@ -29,7 +32,7 @@ def get_date(prompt):
         try:
             return date.fromisoformat(val)
         except:
-            print("Wrong format, use YYYY-MM-DD")
+            print("wrong format, use YYYY-MM-DD")
 
 
 def get_time(prompt):
@@ -39,19 +42,20 @@ def get_time(prompt):
             h, m = val.split(':')
             return time(int(h), int(m))
         except:
-            print("Wrong format")
+            print("wrong format, use HH:MM")
 
 
-# patient stuff
+# ---- patient functions ----
 
 def list_patients(svc):
+    patients = svc.get_all_patients()
+
     print("\n" + "="*50)
     print("  ALL PATIENTS")
     print("="*50 + "\n")
 
-    patients = svc.get_all_patients()
     if not patients:
-        print("No patients found.")
+        print("no patients in the system")
         input("\nPress Enter...")
         return
 
@@ -68,18 +72,21 @@ def view_patient(svc):
     print("\n--- View Patient ---")
     pid = get_int("Enter Patient ID: ")
     p = svc.get_patient_by_id(pid)
+
     if not p:
-        print(f"Patient {pid} not found")
-    else:
-        print(f"\nID: {p.patient_id}")
-        print(f"MRN: {p.mrn}")
-        print(f"Name: {p.first_name} {p.last_name}")
-        print(f"DOB: {p.dob}")
-        print(f"Gender: {p.gender}")
-        print(f"Phone: {p.phone or 'N/A'}")
-        print(f"Email: {p.email or 'N/A'}")
-        print(f"Address: {p.address}, {p.city}, {p.state} {p.zip_code}")
-    input("\nPress Enter to continue...")
+        print(f"no patient found with ID {pid}")
+        input("\nPress Enter...")
+        return
+
+    print(f"\nID: {p.patient_id}")
+    print(f"MRN: {p.mrn}")
+    print(f"Name: {p.first_name} {p.last_name}")
+    print(f"DOB: {p.dob}")
+    print(f"Gender: {p.gender}")
+    print(f"Phone: {p.phone or 'N/A'}")
+    print(f"Email: {p.email or 'N/A'}")
+    print(f"Address: {p.address}, {p.city}, {p.state} {p.zip_code}")
+    input("\nPress Enter...")
 
 
 def patient_dashboard(svc):
@@ -88,7 +95,7 @@ def patient_dashboard(svc):
     dash = svc.get_patient_dashboard(pid)
 
     if not dash:
-        print(f"Patient {pid} not found")
+        print(f"patient {pid} not found")
         input("\nPress Enter...")
         return
 
@@ -116,6 +123,7 @@ def patient_dashboard(svc):
             print(f"  - {apt.appt_date} {apt.appt_time} - {apt.reason}")
     else:
         print("  None")
+
     input("\nPress Enter...")
 
 
@@ -134,20 +142,26 @@ def add_patient(svc):
     city = get_input("City: ")
     state = get_input("State: ")
     zipcode = get_input("ZIP: ")
-    comm = get_input("Communication Preference (email/phone/mail): ")
+
+    # the db enum only accepts these exact values (case sensitive), took a while to figure out
+    comm = get_input("Communication Preference (Email/Phone/Mail/Portal): ")
+    while comm not in ['Email', 'Phone', 'Mail', 'Portal']:
+        print("please enter exactly: Email, Phone, Mail, or Portal")
+        comm = get_input("Try again: ")
+
     pharmacy = get_input("Preferred Pharmacy: ")
 
-    patient = Patient(
+    p = Patient(
         patient_id=None, mrn=mrn, ssn=ssn, first_name=first, last_name=last,
         dob=dob, gender=gender, phone=phone, email=email, address=addr,
         city=city, state=state, zip_code=zipcode, comm_pref=comm, pref_pharmacy=pharmacy
     )
 
     try:
-        created = svc.create_patient(patient)
-        print(f"\nPatient created with ID: {created.patient_id}")
+        created = svc.create_patient(p)
+        print(f"\npatient added, ID is: {created.patient_id}")
     except Exception as e:
-        print(f"Error creating patient: {e}")
+        print(f"something went wrong: {e}")
     input("\nPress Enter...")
 
 
@@ -157,19 +171,23 @@ def update_patient(svc):
     p = svc.get_patient_by_id(pid)
 
     if not p:
-        print("Patient not found!")
+        print("patient not found")
         input("\nPress Enter...")
         return
 
-    print(f"Updating {p.first_name} {p.last_name}")
-    print("(press Enter to keep current value)\n")
+    print(f"updating {p.first_name} {p.last_name}")
+    print("press Enter to keep existing value\n")
 
     mrn = get_input(f"MRN [{p.mrn}]: ", False) or p.mrn
+    if len(mrn) > 10:
+        print("MRN can't be more than 10 characters, keeping the old one")
+        mrn = p.mrn
+
     ssn = get_input(f"SSN [{p.ssn}]: ", False) or p.ssn
     first = get_input(f"First Name [{p.first_name}]: ", False) or p.first_name
     last = get_input(f"Last Name [{p.last_name}]: ", False) or p.last_name
-    dob_s = get_input(f"DOB [{p.dob}]: ", False)
-    dob = date.fromisoformat(dob_s) if dob_s else p.dob
+    dob_str = get_input(f"DOB [{p.dob}]: ", False)
+    dob = date.fromisoformat(dob_str) if dob_str else p.dob
     gender = get_input(f"Gender [{p.gender}]: ", False) or p.gender
     phone = get_input(f"Phone [{p.phone}]: ", False) or p.phone
     email = get_input(f"Email [{p.email}]: ", False) or p.email
@@ -188,9 +206,9 @@ def update_patient(svc):
 
     try:
         svc.update_patient(pid, updated)
-        print("Patient updated!")
+        print("updated!")
     except Exception as e:
-        print(f"Error: {e}")
+        print(f"error: {e}")
     input("\nPress Enter...")
 
 
@@ -200,31 +218,31 @@ def delete_patient(svc):
     p = svc.get_patient_by_id(pid)
 
     if not p:
-        print("Not found")
+        print("not found")
         input("\nPress Enter...")
         return
 
-    confirm = input(f"Are you sure you want to delete {p.first_name} {p.last_name}? (yes/no): ")
+    confirm = input(f"delete {p.first_name} {p.last_name}? (yes/no): ")
     if confirm.lower() == 'yes':
         try:
             svc.delete_patient(pid)
-            print("Deleted successfully")
+            print("deleted")
         except Exception as e:
-            print(f"Error: {e}")
+            print(f"error: {e}")
     else:
-        print("Cancelled")
+        print("cancelled")
     input("\nPress Enter...")
 
 
 def search_patients(svc):
     print("\n--- Search Patients ---")
-    term = get_input("Enter name to search: ")
+    term = get_input("name to search: ")
     results = svc.search_patients_by_name(term)
 
     if not results:
-        print("No patients found")
+        print("no matches found")
     else:
-        print(f"\nFound {len(results)} patient(s):")
+        print(f"\n{len(results)} result(s):")
         for p in results:
             print(f"  {p.patient_id}: {p.first_name} {p.last_name} ({p.mrn})")
     input("\nPress Enter...")
@@ -235,11 +253,10 @@ def polypharmacy_report(svc):
     results = svc.get_polypharmacy_patients(5)
 
     if not results:
-        print("No patients with 5+ active prescriptions")
+        print("no patients with 5+ active prescriptions")
     else:
-        print("Patients with 5+ active prescriptions:\n")
         for p, count in results:
-            print(f"  {p.first_name} {p.last_name}: {count} prescriptions")
+            print(f"  {p.first_name} {p.last_name}: {count} active prescriptions")
     input("\nPress Enter...")
 
 
@@ -269,17 +286,17 @@ def patient_menu(svc):
         elif choice == '7': search_patients(svc)
         elif choice == '8': polypharmacy_report(svc)
         elif choice == '0': break
-        else: print("Invalid choice")
+        else: print("invalid option")
 
 
-# appointment functions
+# ---- appointment functions ----
 
 def list_appointments(svc):
     print("\n------ All Appointments ------\n")
     appts = svc.get_all_appointments()
 
     if not appts:
-        print("No appointments")
+        print("no appointments found")
         input("\nPress Enter...")
         return
 
@@ -297,18 +314,17 @@ def view_appointment(svc):
     detail = svc.get_appointment_detail(aid)
 
     if not detail:
-        print("Appointment not found")
+        print("appointment not found")
         input("\nPress Enter...")
         return
 
     a = detail.appointment
     print(f"\nAppointment #{a.appt_id}")
     print(f"Date: {a.appt_date} at {a.appt_time}")
-    print(f"Duration: {a.duration} minutes")
+    print(f"Duration: {a.duration} mins")
     print(f"Status: {a.status}")
     print(f"Type: {a.appt_type}")
     print(f"Reason: {a.reason}")
-
     if detail.patient:
         print(f"Patient: {detail.patient.first_name} {detail.patient.last_name}")
     if detail.provider:
@@ -321,12 +337,12 @@ def upcoming_appointments(svc):
     appts = svc.get_upcoming_appointments()
 
     if not appts:
-        print("No upcoming appointments")
+        print("no upcoming appointments")
     else:
         for d in appts:
             a = d.appointment
             pname = f"{d.patient.first_name} {d.patient.last_name}" if d.patient else "N/A"
-            print(f"  {a.appt_date} {a.appt_time} - {pname} - {a.reason}")
+            print(f"  {a.appt_date} {str(a.appt_time)[:5]} - {pname} - {a.reason}")
     input("\nPress Enter...")
 
 
@@ -335,7 +351,13 @@ def schedule_appointment(svc):
 
     patient_id = get_int("Patient ID: ")
     provider_id = get_int("Provider ID: ")
+
     appt_date = get_date("Appointment Date")
+    # don't allow past dates
+    while appt_date <= date.today():
+        print("that date is in the past, pick a future date")
+        appt_date = get_date("Appointment Date")
+
     appt_time = get_time("Appointment Time")
     duration = get_int("Duration in minutes: ")
     appt_type = get_input("Appointment Type: ")
@@ -350,9 +372,15 @@ def schedule_appointment(svc):
 
     try:
         created = svc.create_appointment(appt)
-        print(f"\nAppointment scheduled! ID: {created.appt_id}")
+        print(f"\nscheduled! appointment ID: {created.appt_id}")
     except Exception as e:
-        print(f"Failed to schedule: {e}")
+        err = str(e)
+        if "appointment_provider_id_fkey" in err:
+            print("provider ID doesn't exist, double check it")
+        elif "appointment_patient_id_fkey" in err:
+            print("patient ID doesn't exist, double check it")
+        else:
+            print(f"failed: {e}")
     input("\nPress Enter...")
 
 
@@ -360,15 +388,15 @@ def cancel_appointment(svc):
     print("\n--- Cancel Appointment ---")
     aid = get_int("Appointment ID to cancel: ")
 
-    confirm = input("Are you sure? (yes/no): ")
+    confirm = input("sure? (yes/no): ")
     if confirm.lower() == 'yes':
         try:
             svc.cancel_appointment(aid)
-            print("Appointment cancelled")
+            print("cancelled")
         except Exception as e:
-            print(f"Error: {e}")
+            print(f"error: {e}")
     else:
-        print("Not cancelled")
+        print("ok, not cancelled")
     input("\nPress Enter...")
 
 
@@ -376,13 +404,18 @@ def delete_appointment(svc):
     print("\n--- Delete Appointment ---")
     aid = get_int("Appointment ID: ")
 
-    confirm = input("Confirm delete? (yes/no): ")
+    confirm = input("confirm delete? (yes/no): ")
     if confirm.lower() == 'yes':
         try:
             svc.delete_appointment(aid)
-            print("Deleted")
+            print("deleted")
         except Exception as e:
-            print(f"Error: {e}")
+            err = str(e)
+            # this happens when there's a billing record tied to the appointment
+            if "billing_record_appt_id_fkey" in err:
+                print("can't delete this, it has billing records attached - cancel it instead")
+            else:
+                print(f"error: {e}")
     input("\nPress Enter...")
 
 
@@ -408,17 +441,17 @@ def appointment_menu(svc):
         elif choice == '5': cancel_appointment(svc)
         elif choice == '6': delete_appointment(svc)
         elif choice == '0': break
-        else: print("Invalid option")
+        else: print("invalid")
 
 
-# prescription stuff
+# ---- prescription functions ----
 
 def list_prescriptions(svc):
     print("\n------ All Prescriptions ------\n")
     rxs = svc.get_all_prescriptions()
 
     if not rxs:
-        print("No prescriptions in system")
+        print("none found")
         input("\nPress Enter...")
         return
 
@@ -426,7 +459,7 @@ def list_prescriptions(svc):
     print("-" * 55)
     for rx in rxs:
         print(f"{rx.rx_id:<5} {str(rx.date_written):<12} {rx.patient_id:<10} {rx.dosage:<15} {rx.status:<10}")
-    print(f"\n{len(rxs)} prescription(s) total")
+    print(f"\n{len(rxs)} total")
     input("\nPress Enter...")
 
 
@@ -436,7 +469,7 @@ def view_prescription(svc):
     detail = svc.get_prescription_detail(rid)
 
     if not detail:
-        print("Not found")
+        print("not found")
         input("\nPress Enter...")
         return
 
@@ -446,10 +479,9 @@ def view_prescription(svc):
     print(f"Dosage: {rx.dosage}")
     print(f"Frequency: {rx.frequency}")
     print(f"Quantity: {rx.quantity}")
-    print(f"Refills Remaining: {rx.refills}")
+    print(f"Refills: {rx.refills}")
     print(f"Status: {rx.status}")
-    print(f"Controlled Substance: {'Yes' if rx.is_controlled else 'No'}")
-
+    print(f"Controlled: {'Yes' if rx.is_controlled else 'No'}")
     if detail.medication:
         print(f"Medication: {detail.medication.name}")
     if detail.patient:
@@ -464,7 +496,7 @@ def active_prescriptions(svc):
     rxs = svc.get_active_prescriptions()
 
     if not rxs:
-        print("No active prescriptions")
+        print("none")
     else:
         for d in rxs:
             rx = d.prescription
@@ -484,14 +516,18 @@ def create_prescription(svc):
     dosage = get_input("Dosage: ")
     frequency = get_input("Frequency: ")
     quantity = get_int("Quantity: ")
-    refills = get_int("Number of Refills: ")
+    refills = get_int("Refills: ")
 
-    is_controlled = input("Is this a controlled substance? (yes/no): ").lower() == 'yes'
+    is_controlled = input("controlled substance? (yes/no): ").lower() == 'yes'
     schedule = None
     dea = None
     if is_controlled:
         schedule = get_input("DEA Schedule (II/III/IV/V): ")
         dea = get_input("Prescriber DEA Number: ")
+        # format is 2 letters + 7 digits, e.g. AB1234563 - db rejects it otherwise
+        while not re.match(r'^[A-Za-z]{2}\d{7}$', dea):
+            print("wrong format, needs to be 2 letters then 7 digits like AB1234563")
+            dea = get_input("DEA Number: ")
 
     rx = Prescription(
         rx_id=None, patient_id=patient_id, provider_id=provider_id, med_id=med_id,
@@ -502,9 +538,17 @@ def create_prescription(svc):
 
     try:
         created = svc.create_prescription(rx)
-        print(f"\nPrescription created - ID: {created.rx_id}")
+        print(f"\ncreated, ID: {created.rx_id}")
     except Exception as e:
-        print(f"Error: {e}")
+        err = str(e)
+        if "prescription_patient_id_fkey" in err:
+            print("patient ID not found")
+        elif "prescription_provider_id_fkey" in err:
+            print("provider ID not found")
+        elif "prescription_med_id_fkey" in err:
+            print("medication ID not found")
+        else:
+            print(f"error: {e}")
     input("\nPress Enter...")
 
 
@@ -512,13 +556,13 @@ def discontinue_prescription(svc):
     print("\n--- Discontinue Prescription ---")
     rid = get_int("Rx ID: ")
 
-    confirm = input("Discontinue this prescription? (yes/no): ")
+    confirm = input("discontinue? (yes/no): ")
     if confirm.lower() == 'yes':
-        try:
-            svc.discontinue_prescription(rid)
-            print("Prescription discontinued")
-        except Exception as e:
-            print(f"Error: {e}")
+        result = svc.discontinue_prescription(rid)
+        if result:
+            print("done, prescription discontinued")
+        else:
+            print("rx not found")
     input("\nPress Enter...")
 
 
@@ -527,7 +571,7 @@ def controlled_report(svc):
     rxs = svc.get_controlled_substances()
 
     if not rxs:
-        print("No controlled substance prescriptions found")
+        print("none found")
     else:
         print(f"{'Rx ID':<6} {'Schedule':<12} {'Patient':<15} {'DEA#':<15}")
         print("-" * 50)
@@ -562,10 +606,10 @@ def prescription_menu(svc):
         elif choice == '5': discontinue_prescription(svc)
         elif choice == '6': controlled_report(svc)
         elif choice == '0': break
-        else: print("Invalid selection")
+        else: print("invalid")
 
 
-# main menu
+# main
 
 def main_menu():
     patient_svc = PatientService()
@@ -599,13 +643,13 @@ def main_menu():
             print("\nGoodbye!")
             break
         else:
-            print("Invalid choice, try again")
+            print("invalid, try again")
 
 
 if __name__ == "__main__":
     try:
         main_menu()
     except KeyboardInterrupt:
-        print("\n\nExiting...")
+        print("\nexiting...")
     finally:
         close_pool()
