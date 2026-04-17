@@ -135,12 +135,23 @@ def add_patient(svc):
     first = get_input("First Name: ")
     last = get_input("Last Name: ")
     dob = get_date("DOB")
-    gender = get_input("Gender: ")
+    gender = get_input("Gender (Male/Female/Other): ")
+    while gender not in ['Male', 'Female', 'Other']:
+        print("please enter: Male, Female, or Other")
+        gender = get_input("Try again: ")
     phone = get_input("Phone (optional): ", required=False) or None
     email = get_input("Email (optional): ", required=False) or None
+    # db requires at least one of phone or email
+    while phone is None and email is None:
+        print("need at least a phone number or email")
+        phone = get_input("Phone: ", required=False) or None
+        email = get_input("Email: ", required=False) or None
     addr = get_input("Address: ")
     city = get_input("City: ")
-    state = get_input("State: ")
+    state = get_input("State (2-letter code e.g. MD): ").upper()
+    while len(state) != 2 or not state.isalpha():
+        print("state must be a 2-letter code like MD, VA, CA")
+        state = get_input("State: ").upper()
     zipcode = get_input("ZIP: ")
 
     # the db enum only accepts these exact values (case sensitive), took a while to figure out
@@ -522,7 +533,11 @@ def create_prescription(svc):
     schedule = None
     dea = None
     if is_controlled:
-        schedule = get_input("DEA Schedule (II/III/IV/V): ")
+        valid_schedules = ['Schedule I', 'Schedule II', 'Schedule III', 'Schedule IV', 'Schedule V']
+        schedule = get_input("DEA Schedule (e.g. Schedule II): ")
+        while schedule not in valid_schedules:
+            print("must be one of: Schedule I, Schedule II, Schedule III, Schedule IV, Schedule V")
+            schedule = get_input("Try again: ")
         dea = get_input("Prescriber DEA Number: ")
         # format is 2 letters + 7 digits, e.g. AB1234563 - db rejects it otherwise
         while not re.match(r'^[A-Za-z]{2}\d{7}$', dea):
