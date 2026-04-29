@@ -26,7 +26,8 @@ CREATE (dc21:DrugClass {name: 'Alpha Blocker', description: 'Prostate medication
 CREATE (dc22:DrugClass {name: 'Anticoagulant', description: 'Blood thinners'})
 CREATE (dc23:DrugClass {name: 'Analgesic', description: 'Pain relievers'})
 CREATE (dc24:DrugClass {name: 'NSAID', description: 'Anti-inflammatory drugs'})
-CREATE (dc25:DrugClass {name: 'Leukotriene Modifier', description: 'Asthma medications'});
+CREATE (dc25:DrugClass {name: 'Leukotriene Modifier', description: 'Asthma medications'})
+CREATE (dc26:DrugClass {name: 'Cough Suppressant', description: 'Cough medications'});
 
 // Medications (matching PostgreSQL med_id 1-35)
 CREATE (m1:Medication {med_id: 1, name: 'Lipitor', generic_name: 'Atorvastatin', form: 'Tablet', is_controlled: false})
@@ -104,7 +105,7 @@ MATCH (m:Medication {med_id: 21}), (dc:DrugClass {name: 'Muscle Relaxant'}) CREA
 MATCH (m:Medication {med_id: 22}), (dc:DrugClass {name: 'Opioid Analgesic'}) CREATE (m)-[:BELONGS_TO]->(dc);
 MATCH (m:Medication {med_id: 23}), (dc:DrugClass {name: 'Sedative'}) CREATE (m)-[:BELONGS_TO]->(dc);
 MATCH (m:Medication {med_id: 24}), (dc:DrugClass {name: 'Benzodiazepine'}) CREATE (m)-[:BELONGS_TO]->(dc);
-MATCH (m:Medication {med_id: 25}), (dc:DrugClass {name: 'Opioid Analgesic'}) CREATE (m)-[:BELONGS_TO]->(dc);
+MATCH (m:Medication {med_id: 25}), (dc:DrugClass {name: 'Cough Suppressant'}) CREATE (m)-[:BELONGS_TO]->(dc);
 MATCH (m:Medication {med_id: 26}), (dc:DrugClass {name: 'Stimulant'}) CREATE (m)-[:BELONGS_TO]->(dc);
 MATCH (m:Medication {med_id: 27}), (dc:DrugClass {name: 'Antidepressant'}) CREATE (m)-[:BELONGS_TO]->(dc);
 MATCH (m:Medication {med_id: 28}), (dc:DrugClass {name: 'Alpha Blocker'}) CREATE (m)-[:BELONGS_TO]->(dc);
