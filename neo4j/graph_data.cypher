@@ -194,7 +194,8 @@ CREATE (d4:Department {dept_id: 4, name: 'Family Medicine', hospital_id: 2})
 CREATE (d5:Department {dept_id: 5, name: 'Orthopedics', hospital_id: 3})
 CREATE (d6:Department {dept_id: 6, name: 'Internal Medicine', hospital_id: 3})
 CREATE (d7:Department {dept_id: 7, name: 'Pediatrics', hospital_id: 4})
-CREATE (d8:Department {dept_id: 8, name: 'Oncology', hospital_id: 5});
+CREATE (d8:Department {dept_id: 8, name: 'Radiology', hospital_id: 4})
+CREATE (d9:Department {dept_id: 9, name: 'Oncology', hospital_id: 5});
 
 // Department -> Hospital links
 MATCH (d:Department {dept_id: 1}), (h:Hospital {hospital_id: 1}) CREATE (d)-[:PART_OF]->(h);
@@ -204,7 +205,8 @@ MATCH (d:Department {dept_id: 4}), (h:Hospital {hospital_id: 2}) CREATE (d)-[:PA
 MATCH (d:Department {dept_id: 5}), (h:Hospital {hospital_id: 3}) CREATE (d)-[:PART_OF]->(h);
 MATCH (d:Department {dept_id: 6}), (h:Hospital {hospital_id: 3}) CREATE (d)-[:PART_OF]->(h);
 MATCH (d:Department {dept_id: 7}), (h:Hospital {hospital_id: 4}) CREATE (d)-[:PART_OF]->(h);
-MATCH (d:Department {dept_id: 8}), (h:Hospital {hospital_id: 5}) CREATE (d)-[:PART_OF]->(h);
+MATCH (d:Department {dept_id: 8}), (h:Hospital {hospital_id: 4}) CREATE (d)-[:PART_OF]->(h);
+MATCH (d:Department {dept_id: 9}), (h:Hospital {hospital_id: 5}) CREATE (d)-[:PART_OF]->(h);
 
 // Providers
 CREATE (pr1:Provider {provider_id: 1, npi: '1000000001', first_name: 'Kelly', last_name: 'Mbenga', specialty: 'Cardiologist'})
@@ -214,7 +216,8 @@ CREATE (pr4:Provider {provider_id: 4, npi: '1000000004', first_name: 'Michael', 
 CREATE (pr5:Provider {provider_id: 5, npi: '1000000005', first_name: 'William', last_name: 'Jones', specialty: 'Orthopedic Surgeon'})
 CREATE (pr6:Provider {provider_id: 6, npi: '1000000006', first_name: 'David', last_name: 'Garcia', specialty: 'Internist'})
 CREATE (pr7:Provider {provider_id: 7, npi: '1000000007', first_name: 'Richard', last_name: 'Miller', specialty: 'Pediatrician'})
-CREATE (pr8:Provider {provider_id: 8, npi: '1000000008', first_name: 'Thomas', last_name: 'Rodriguez', specialty: 'Oncologist'});
+CREATE (pr8:Provider {provider_id: 8, npi: '1000000008', first_name: 'Joseph', last_name: 'Davis', specialty: 'Registered Nurse'})
+CREATE (pr9:Provider {provider_id: 9, npi: '1000000009', first_name: 'Thomas', last_name: 'Rodriguez', specialty: 'Oncologist'});
 
 // Provider -> Department links
 MATCH (pr:Provider {provider_id: 1}), (d:Department {dept_id: 1}) CREATE (pr)-[:WORKS_IN]->(d);
@@ -225,6 +228,7 @@ MATCH (pr:Provider {provider_id: 5}), (d:Department {dept_id: 5}) CREATE (pr)-[:
 MATCH (pr:Provider {provider_id: 6}), (d:Department {dept_id: 6}) CREATE (pr)-[:WORKS_IN]->(d);
 MATCH (pr:Provider {provider_id: 7}), (d:Department {dept_id: 7}) CREATE (pr)-[:WORKS_IN]->(d);
 MATCH (pr:Provider {provider_id: 8}), (d:Department {dept_id: 8}) CREATE (pr)-[:WORKS_IN]->(d);
+MATCH (pr:Provider {provider_id: 9}), (d:Department {dept_id: 9}) CREATE (pr)-[:WORKS_IN]->(d);
 
 // Provider referral network
 MATCH (pr1:Provider {specialty: 'Family Physician'}), (pr2:Provider {specialty: 'Cardiologist'})
@@ -265,22 +269,22 @@ MATCH (p:Patient {patient_id: 3}), (a:Allergen {name: 'Latex'})
 CREATE (p)-[:ALLERGIC_TO {severity: 'High', reaction: 'Hives'}]->(a);
 
 MATCH (p:Patient {patient_id: 4}), (a:Allergen {name: 'Shellfish'})
-CREATE (p)-[:ALLERGIC_TO {severity: 'Critical', reaction: 'Anaphylaxis'}]->(a);
+CREATE (p)-[:ALLERGIC_TO {severity: 'Critical', reaction: 'Sneezing'}]->(a);
 
 MATCH (p:Patient {patient_id: 5}), (a:Allergen {name: 'Pollen'})
-CREATE (p)-[:ALLERGIC_TO {severity: 'Low', reaction: 'Sneezing'}]->(a);
+CREATE (p)-[:ALLERGIC_TO {severity: 'Low', reaction: 'Stomach pain'}]->(a);
 
 MATCH (p:Patient {patient_id: 6}), (a:Allergen {name: 'Ibuprofen'})
-CREATE (p)-[:ALLERGIC_TO {severity: 'Moderate', reaction: 'Rash'}]->(a);
+CREATE (p)-[:ALLERGIC_TO {severity: 'Moderate', reaction: 'Anaphylaxis'}]->(a);
 
 MATCH (p:Patient {patient_id: 7}), (a:Allergen {name: 'Dust'})
-CREATE (p)-[:ALLERGIC_TO {severity: 'High', reaction: 'Sneezing'}]->(a);
+CREATE (p)-[:ALLERGIC_TO {severity: 'High', reaction: 'Skin irritation'}]->(a);
 
 MATCH (p:Patient {patient_id: 8}), (a:Allergen {name: 'Soy'})
-CREATE (p)-[:ALLERGIC_TO {severity: 'Critical', reaction: 'Swelling'}]->(a);
+CREATE (p)-[:ALLERGIC_TO {severity: 'Critical', reaction: 'Rash'}]->(a);
 
 MATCH (p:Patient {patient_id: 9}), (a:Allergen {name: 'Eggs'})
-CREATE (p)-[:ALLERGIC_TO {severity: 'Low', reaction: 'Stomach pain'}]->(a);
+CREATE (p)-[:ALLERGIC_TO {severity: 'Low', reaction: 'Swelling'}]->(a);
 
 MATCH (p:Patient {patient_id: 10}), (a:Allergen {name: 'Bee stings'})
 CREATE (p)-[:ALLERGIC_TO {severity: 'Moderate', reaction: 'Hives'}]->(a);
