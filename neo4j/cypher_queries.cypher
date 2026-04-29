@@ -58,3 +58,36 @@ OPTIONAL MATCH (m:Medication)-[:CONTRAINDICATED_FOR]->(a)
 RETURN p.patient_id, p.first_name + ' ' + p.last_name AS patient,
        a.name AS drug_allergy, allergy.severity,
        COLLECT(m.name) AS medications_to_avoid;
+
+
+// 9. Disease pathway - find treatment options for a disease
+MATCH (d:Disease {name: 'Hypertension'})-[:TREATED_BY]->(m:Medication)
+OPTIONAL MATCH (m)-[:BELONGS_TO]->(dc:DrugClass)
+RETURN d.name AS disease, d.icd10 AS icd10_code,
+       m.name AS treatment, dc.name AS drug_class
+ORDER BY m.name;
+
+
+// 10. Disease symptoms and treatments (full pathway)
+MATCH (d:Disease)-[p:PRESENTS_WITH]->(s:Symptom)
+MATCH (d)-[t:TREATED_BY]->(m:Medication)
+WHERE d.name = 'Type 2 Diabetes'
+RETURN d.name AS disease,
+       COLLECT(DISTINCT s.name) AS symptoms,
+       COLLECT(DISTINCT m.name) AS treatments;
+
+
+// 11. Check medication contraindication for disease
+MATCH (m:Medication)-[c:CONTRAINDICATED_IN]->(d:Disease)
+RETURN m.name AS medication, d.name AS disease,
+       c.reason AS contraindication_reason
+ORDER BY d.name;
+
+
+// 12. Find safe medications for patient with specific disease
+MATCH (d:Disease {name: 'Kidney Disease'})<-[c:CONTRAINDICATED_IN]-(unsafe:Medication)
+MATCH (d)-[:TREATED_BY]->(safe:Medication)
+WHERE NOT (safe)-[:CONTRAINDICATED_IN]->(d)
+RETURN d.name AS disease,
+       COLLECT(DISTINCT safe.name) AS safe_treatments,
+       COLLECT(DISTINCT unsafe.name) AS avoid_medications;

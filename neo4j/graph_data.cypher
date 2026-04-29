@@ -305,3 +305,209 @@ CREATE (p)-[:TREATED_BY]->(pr);
 
 MATCH (p:Patient {patient_id: 5}), (pr:Provider {provider_id: 5})
 CREATE (p)-[:TREATED_BY]->(pr);
+
+// ============================================
+// DISEASES (10+ nodes with ICD-10 codes)
+// ============================================
+CREATE (dis1:Disease {name: 'Hypertension', icd10: 'I10', category: 'Cardiovascular', chronic: true})
+CREATE (dis2:Disease {name: 'Type 2 Diabetes', icd10: 'E11.9', category: 'Metabolic', chronic: true})
+CREATE (dis3:Disease {name: 'Heart Failure', icd10: 'I50.9', category: 'Cardiovascular', chronic: true})
+CREATE (dis4:Disease {name: 'Asthma', icd10: 'J45.909', category: 'Respiratory', chronic: true})
+CREATE (dis5:Disease {name: 'Major Depression', icd10: 'F32.9', category: 'Mental Health', chronic: true})
+CREATE (dis6:Disease {name: 'Generalized Anxiety', icd10: 'F41.1', category: 'Mental Health', chronic: true})
+CREATE (dis7:Disease {name: 'Hypothyroidism', icd10: 'E03.9', category: 'Endocrine', chronic: true})
+CREATE (dis8:Disease {name: 'GERD', icd10: 'K21.0', category: 'Gastrointestinal', chronic: true})
+CREATE (dis9:Disease {name: 'Atrial Fibrillation', icd10: 'I48.91', category: 'Cardiovascular', chronic: true})
+CREATE (dis10:Disease {name: 'Chronic Pain', icd10: 'G89.29', category: 'Neurological', chronic: true})
+CREATE (dis11:Disease {name: 'Kidney Disease', icd10: 'N18.9', category: 'Renal', chronic: true})
+CREATE (dis12:Disease {name: 'Liver Disease', icd10: 'K76.9', category: 'Hepatic', chronic: true});
+
+// ============================================
+// SYMPTOMS (10+ nodes)
+// ============================================
+CREATE (sym1:Symptom {name: 'Chest Pain', body_system: 'Cardiovascular', severity_range: 'mild-severe'})
+CREATE (sym2:Symptom {name: 'Shortness of Breath', body_system: 'Respiratory', severity_range: 'mild-severe'})
+CREATE (sym3:Symptom {name: 'Fatigue', body_system: 'General', severity_range: 'mild-moderate'})
+CREATE (sym4:Symptom {name: 'Headache', body_system: 'Neurological', severity_range: 'mild-severe'})
+CREATE (sym5:Symptom {name: 'Dizziness', body_system: 'Neurological', severity_range: 'mild-moderate'})
+CREATE (sym6:Symptom {name: 'Palpitations', body_system: 'Cardiovascular', severity_range: 'mild-moderate'})
+CREATE (sym7:Symptom {name: 'Edema', body_system: 'Cardiovascular', severity_range: 'mild-severe'})
+CREATE (sym8:Symptom {name: 'Frequent Urination', body_system: 'Metabolic', severity_range: 'mild-moderate'})
+CREATE (sym9:Symptom {name: 'Anxiety', body_system: 'Mental Health', severity_range: 'mild-severe'})
+CREATE (sym10:Symptom {name: 'Insomnia', body_system: 'Mental Health', severity_range: 'mild-moderate'})
+CREATE (sym11:Symptom {name: 'Nausea', body_system: 'Gastrointestinal', severity_range: 'mild-moderate'})
+CREATE (sym12:Symptom {name: 'Blurred Vision', body_system: 'Ophthalmologic', severity_range: 'mild-moderate'});
+
+// ============================================
+// TREATED_BY relationships (Disease -> Medication) - 12+
+// ============================================
+// Hypertension treatments
+MATCH (d:Disease {name: 'Hypertension'}), (m:Medication {name: 'Lisinopril'})
+CREATE (d)-[:TREATED_BY {evidence_level: 'A', first_line: true}]->(m);
+
+MATCH (d:Disease {name: 'Hypertension'}), (m:Medication {name: 'Amlodipine'})
+CREATE (d)-[:TREATED_BY {evidence_level: 'A', first_line: true}]->(m);
+
+MATCH (d:Disease {name: 'Hypertension'}), (m:Medication {name: 'Losartan'})
+CREATE (d)-[:TREATED_BY {evidence_level: 'A', first_line: true}]->(m);
+
+// Type 2 Diabetes treatments
+MATCH (d:Disease {name: 'Type 2 Diabetes'}), (m:Medication {name: 'Metformin'})
+CREATE (d)-[:TREATED_BY {evidence_level: 'A', first_line: true}]->(m);
+
+MATCH (d:Disease {name: 'Type 2 Diabetes'}), (m:Medication {name: 'Insulin Glargine'})
+CREATE (d)-[:TREATED_BY {evidence_level: 'A', first_line: false}]->(m);
+
+MATCH (d:Disease {name: 'Type 2 Diabetes'}), (m:Medication {name: 'Insulin Lispro'})
+CREATE (d)-[:TREATED_BY {evidence_level: 'A', first_line: false}]->(m);
+
+// Heart Failure treatments
+MATCH (d:Disease {name: 'Heart Failure'}), (m:Medication {name: 'Lisinopril'})
+CREATE (d)-[:TREATED_BY {evidence_level: 'A', first_line: true}]->(m);
+
+MATCH (d:Disease {name: 'Heart Failure'}), (m:Medication {name: 'Furosemide'})
+CREATE (d)-[:TREATED_BY {evidence_level: 'A', first_line: true}]->(m);
+
+// Asthma treatments
+MATCH (d:Disease {name: 'Asthma'}), (m:Medication {name: 'Albuterol Inhaler'})
+CREATE (d)-[:TREATED_BY {evidence_level: 'A', first_line: true}]->(m);
+
+MATCH (d:Disease {name: 'Asthma'}), (m:Medication {name: 'Montelukast'})
+CREATE (d)-[:TREATED_BY {evidence_level: 'B', first_line: false}]->(m);
+
+// Depression treatments
+MATCH (d:Disease {name: 'Major Depression'}), (m:Medication {name: 'Sertraline'})
+CREATE (d)-[:TREATED_BY {evidence_level: 'A', first_line: true}]->(m);
+
+MATCH (d:Disease {name: 'Major Depression'}), (m:Medication {name: 'Escitalopram'})
+CREATE (d)-[:TREATED_BY {evidence_level: 'A', first_line: true}]->(m);
+
+MATCH (d:Disease {name: 'Major Depression'}), (m:Medication {name: 'Bupropion'})
+CREATE (d)-[:TREATED_BY {evidence_level: 'A', first_line: false}]->(m);
+
+// Anxiety treatments
+MATCH (d:Disease {name: 'Generalized Anxiety'}), (m:Medication {name: 'Sertraline'})
+CREATE (d)-[:TREATED_BY {evidence_level: 'A', first_line: true}]->(m);
+
+MATCH (d:Disease {name: 'Generalized Anxiety'}), (m:Medication {name: 'Escitalopram'})
+CREATE (d)-[:TREATED_BY {evidence_level: 'A', first_line: true}]->(m);
+
+// Hypothyroidism treatment
+MATCH (d:Disease {name: 'Hypothyroidism'}), (m:Medication {name: 'Levothyroxine'})
+CREATE (d)-[:TREATED_BY {evidence_level: 'A', first_line: true}]->(m);
+
+// GERD treatment
+MATCH (d:Disease {name: 'GERD'}), (m:Medication {name: 'Omeprazole'})
+CREATE (d)-[:TREATED_BY {evidence_level: 'A', first_line: true}]->(m);
+
+// Atrial Fibrillation treatment
+MATCH (d:Disease {name: 'Atrial Fibrillation'}), (m:Medication {name: 'Warfarin'})
+CREATE (d)-[:TREATED_BY {evidence_level: 'A', first_line: true}]->(m);
+
+// Chronic Pain treatments
+MATCH (d:Disease {name: 'Chronic Pain'}), (m:Medication {name: 'Gabapentin'})
+CREATE (d)-[:TREATED_BY {evidence_level: 'B', first_line: true}]->(m);
+
+MATCH (d:Disease {name: 'Chronic Pain'}), (m:Medication {name: 'Tramadol'})
+CREATE (d)-[:TREATED_BY {evidence_level: 'B', first_line: false}]->(m);
+
+// ============================================
+// PRESENTS_WITH relationships (Disease -> Symptom) - 10+
+// ============================================
+// Hypertension symptoms
+MATCH (d:Disease {name: 'Hypertension'}), (s:Symptom {name: 'Headache'})
+CREATE (d)-[:PRESENTS_WITH {frequency: 'common'}]->(s);
+
+MATCH (d:Disease {name: 'Hypertension'}), (s:Symptom {name: 'Dizziness'})
+CREATE (d)-[:PRESENTS_WITH {frequency: 'common'}]->(s);
+
+// Type 2 Diabetes symptoms
+MATCH (d:Disease {name: 'Type 2 Diabetes'}), (s:Symptom {name: 'Fatigue'})
+CREATE (d)-[:PRESENTS_WITH {frequency: 'very common'}]->(s);
+
+MATCH (d:Disease {name: 'Type 2 Diabetes'}), (s:Symptom {name: 'Frequent Urination'})
+CREATE (d)-[:PRESENTS_WITH {frequency: 'very common'}]->(s);
+
+MATCH (d:Disease {name: 'Type 2 Diabetes'}), (s:Symptom {name: 'Blurred Vision'})
+CREATE (d)-[:PRESENTS_WITH {frequency: 'common'}]->(s);
+
+// Heart Failure symptoms
+MATCH (d:Disease {name: 'Heart Failure'}), (s:Symptom {name: 'Shortness of Breath'})
+CREATE (d)-[:PRESENTS_WITH {frequency: 'very common'}]->(s);
+
+MATCH (d:Disease {name: 'Heart Failure'}), (s:Symptom {name: 'Edema'})
+CREATE (d)-[:PRESENTS_WITH {frequency: 'very common'}]->(s);
+
+MATCH (d:Disease {name: 'Heart Failure'}), (s:Symptom {name: 'Fatigue'})
+CREATE (d)-[:PRESENTS_WITH {frequency: 'common'}]->(s);
+
+// Asthma symptoms
+MATCH (d:Disease {name: 'Asthma'}), (s:Symptom {name: 'Shortness of Breath'})
+CREATE (d)-[:PRESENTS_WITH {frequency: 'very common'}]->(s);
+
+MATCH (d:Disease {name: 'Asthma'}), (s:Symptom {name: 'Chest Pain'})
+CREATE (d)-[:PRESENTS_WITH {frequency: 'common'}]->(s);
+
+// Depression symptoms
+MATCH (d:Disease {name: 'Major Depression'}), (s:Symptom {name: 'Fatigue'})
+CREATE (d)-[:PRESENTS_WITH {frequency: 'very common'}]->(s);
+
+MATCH (d:Disease {name: 'Major Depression'}), (s:Symptom {name: 'Insomnia'})
+CREATE (d)-[:PRESENTS_WITH {frequency: 'common'}]->(s);
+
+// Anxiety symptoms
+MATCH (d:Disease {name: 'Generalized Anxiety'}), (s:Symptom {name: 'Anxiety'})
+CREATE (d)-[:PRESENTS_WITH {frequency: 'very common'}]->(s);
+
+MATCH (d:Disease {name: 'Generalized Anxiety'}), (s:Symptom {name: 'Insomnia'})
+CREATE (d)-[:PRESENTS_WITH {frequency: 'common'}]->(s);
+
+MATCH (d:Disease {name: 'Generalized Anxiety'}), (s:Symptom {name: 'Palpitations'})
+CREATE (d)-[:PRESENTS_WITH {frequency: 'common'}]->(s);
+
+// GERD symptoms
+MATCH (d:Disease {name: 'GERD'}), (s:Symptom {name: 'Chest Pain'})
+CREATE (d)-[:PRESENTS_WITH {frequency: 'common'}]->(s);
+
+MATCH (d:Disease {name: 'GERD'}), (s:Symptom {name: 'Nausea'})
+CREATE (d)-[:PRESENTS_WITH {frequency: 'common'}]->(s);
+
+// Atrial Fibrillation symptoms
+MATCH (d:Disease {name: 'Atrial Fibrillation'}), (s:Symptom {name: 'Palpitations'})
+CREATE (d)-[:PRESENTS_WITH {frequency: 'very common'}]->(s);
+
+MATCH (d:Disease {name: 'Atrial Fibrillation'}), (s:Symptom {name: 'Shortness of Breath'})
+CREATE (d)-[:PRESENTS_WITH {frequency: 'common'}]->(s);
+
+// ============================================
+// CONTRAINDICATED_IN relationships (Medication -> Disease) - 6+
+// ============================================
+MATCH (m:Medication {name: 'Metformin'}), (d:Disease {name: 'Kidney Disease'})
+CREATE (m)-[:CONTRAINDICATED_IN {reason: 'Risk of lactic acidosis'}]->(d);
+
+MATCH (m:Medication {name: 'Naproxen'}), (d:Disease {name: 'Heart Failure'})
+CREATE (m)-[:CONTRAINDICATED_IN {reason: 'Fluid retention and worsening heart failure'}]->(d);
+
+MATCH (m:Medication {name: 'Naproxen'}), (d:Disease {name: 'Kidney Disease'})
+CREATE (m)-[:CONTRAINDICATED_IN {reason: 'Nephrotoxicity risk'}]->(d);
+
+MATCH (m:Medication {name: 'Lisinopril'}), (d:Disease {name: 'Kidney Disease'})
+CREATE (m)-[:CONTRAINDICATED_IN {reason: 'May worsen renal function'}]->(d);
+
+MATCH (m:Medication {name: 'Oxycodone'}), (d:Disease {name: 'Liver Disease'})
+CREATE (m)-[:CONTRAINDICATED_IN {reason: 'Impaired metabolism increases toxicity'}]->(d);
+
+MATCH (m:Medication {name: 'Acetaminophen'}), (d:Disease {name: 'Liver Disease'})
+CREATE (m)-[:CONTRAINDICATED_IN {reason: 'Hepatotoxicity risk'}]->(d);
+
+MATCH (m:Medication {name: 'Warfarin'}), (d:Disease {name: 'Liver Disease'})
+CREATE (m)-[:CONTRAINDICATED_IN {reason: 'Impaired clotting factor synthesis'}]->(d);
+
+// ============================================
+// Additional INTERACTS_WITH relationships (to reach 15+)
+// ============================================
+MATCH (m1:Medication {name: 'Warfarin'}), (m2:Medication {name: 'Omeprazole'})
+CREATE (m1)-[:INTERACTS_WITH {severity: 'moderate', description: 'Altered warfarin metabolism'}]->(m2);
+
+MATCH (m1:Medication {name: 'Metformin'}), (m2:Medication {name: 'Furosemide'})
+CREATE (m1)-[:INTERACTS_WITH {severity: 'moderate', description: 'Increased risk of lactic acidosis'}]->(m2);

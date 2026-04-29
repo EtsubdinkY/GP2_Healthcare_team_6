@@ -23,6 +23,12 @@ FOR (d:Department) REQUIRE d.dept_id IS UNIQUE;
 CREATE CONSTRAINT hospital_id_unique IF NOT EXISTS
 FOR (h:Hospital) REQUIRE h.hospital_id IS UNIQUE;
 
+CREATE CONSTRAINT disease_icd10_unique IF NOT EXISTS
+FOR (d:Disease) REQUIRE d.icd10 IS UNIQUE;
+
+CREATE CONSTRAINT symptom_name_unique IF NOT EXISTS
+FOR (s:Symptom) REQUIRE s.name IS UNIQUE;
+
 // Indexes for faster lookups
 CREATE INDEX medication_name_index IF NOT EXISTS
 FOR (m:Medication) ON (m.name);
@@ -41,3 +47,12 @@ FOR (pr:Provider) ON (pr.npi);
 
 CREATE INDEX hospital_name_index IF NOT EXISTS
 FOR (h:Hospital) ON (h.name);
+
+CREATE INDEX disease_name_index IF NOT EXISTS
+FOR (d:Disease) ON (d.name);
+
+CREATE INDEX disease_category_index IF NOT EXISTS
+FOR (d:Disease) ON (d.category);
+
+CREATE INDEX symptom_body_system_index IF NOT EXISTS
+FOR (s:Symptom) ON (s.body_system);
