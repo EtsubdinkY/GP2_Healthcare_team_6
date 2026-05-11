@@ -6,7 +6,10 @@ from datetime import date, time
 from src.config.database import close_pool
 from src.models import Patient, Appointment, Prescription
 from src.services import PatientService, AppointmentService, PrescriptionService
-
+from src.services.clinical_record_service import ClinicalRecordService
+from src.services.prescription_safety_service import PrescriptionSafetyService
+from src.repositories.mongodb.clinical_notes_repo import ClinicalNotesRepository
+from src.repositories.neo4j.knowledge_graph_repo import KnowledgeGraphRepository
 
 # helper functions for input
 
@@ -644,6 +647,7 @@ def main_menu():
         print("4. Quick View - Upcoming Appointments")
         print("5. Quick View - Active Prescriptions")
         print("6. Quick View - Polypharmacy Report")
+        print("7. GP3 Cross-Database Operations")
         print("0. Exit")
 
         choice = input("\nEnter your choice: ").strip()
@@ -654,11 +658,119 @@ def main_menu():
         elif choice == '4': upcoming_appointments(appt_svc)
         elif choice == '5': active_prescriptions(rx_svc)
         elif choice == '6': polypharmacy_report(patient_svc)
+        elif choice == '7': gp3_integration_menu(patient_svc, rx_svc)
         elif choice == '0':
             print("\nGoodbye!")
             break
         else:
             print("invalid, try again")
+
+# ---- GP3 cross-database integration functions ----
+
+def gp3_integration_menu(patient_svc, rx_svc):
+    mongo_notes_repo = ClinicalNotesRepository()
+    neo4j_repo = KnowledgeGraphRepository()
+
+    clinical_service = ClinicalRecordService(
+        patient_service=patient_svc,
+        prescription_service=rx_svc,
+        mongo_notes_repo=mongo_notes_repo,
+        neo4j_repo=neo4j_repo
+    )
+
+    safety_service = PrescriptionSafetyService(
+        patient_service=patient_svc,
+        prescription_service=rx_svc,
+        neo4j_repo=neo4j_repo
+    )
+
+    while True:
+        print("\n========================================")
+        print("      GP3 CROSS-DATABASE OPERATIONS")
+        print("========================================")
+        print("1. Complete Patient Record")
+        print("2. Prescription Safety Check")
+        print("0. Back to Main Menu")
+
+        choice = input("\nEnter choice: ").strip()
+
+        if choice == '1':
+            patient_id = get_int("Enter Patient ID: ")
+            user_id = get_input("Enter User ID: ", required=False) or "demo_user"
+            user_role = get_input("Enter User Role: ", required=False) or "clinician"
+
+            record = clinical_service.get_complete_record(
+                patient_id=patient_id,
+                user_id=user_id,
+                user_role=user_role
+            )
+
+            patient = record["demographics"]
+
+            print("\n========== COMPLETE PATIENT RECORD ==========")
+
+            print("\nPostgreSQL: Patient Demographics")
+            if patient:
+                print(f"ID: {patient.patient_id}")
+                print(f"Name: {patient.first_name} {patient.last_name}")
+                print(f"MRN: {patient.mrn}")
+                print(f"DOB: {patient.dob}")
+            else:
+                print("Patient not found.")
+
+            print("\nPostgreSQL: Active Medications")
+            if record["active_medications"]:
+                for item in record["active_medications"]:
+                    med_name = item.medication.name if getattr(item, "medication", None) else "Unknown"
+                    rx = item.prescription
+                    print(f"- {med_name}: {rx.dosage}, {rx.frequency}")
+            else:
+                print("- None found")
+
+            print("\nMongoDB: Recent Clinical Notes")
+            if record["clinical_notes"]:
+                for note in record["clinical_notes"]:
+                    print(f"- {note}")
+            else:
+                print("- No MongoDB notes available yet")
+
+            print("\nNeo4j: Medication Safety Alerts")
+            if record["safety_alerts"]:
+                for alert in record["safety_alerts"]:
+                    print(f"- {alert.medication1} + {alert.medication2}: {alert.severity} - {alert.description}")
+            else:
+                print("- No interaction alerts found")
+
+            input("\nPress Enter...")
+
+        elif choice == '2':
+            patient_id = get_int("Enter Patient ID: ")
+            new_medication = get_input("Enter New Medication Name: ")
+
+            result = safety_service.check_prescription_safety(
+                patient_id=patient_id,
+                new_medication_name=new_medication
+            )
+
+            print("\n========== PRESCRIPTION SAFETY CHECK ==========")
+            print(result["message"])
+
+            if result["interaction_alerts"]:
+                print("\nInteraction Warnings:")
+                for alert in result["interaction_alerts"]:
+                    print(f"- {alert.medication1} + {alert.medication2}: {alert.severity} - {alert.description}")
+                print("\nPrescription should NOT be inserted.")
+            else:
+                print("\nNo warnings found.")
+                print("In the final version, the prescription can be inserted into PostgreSQL.")
+
+            input("\nPress Enter...")
+
+        elif choice == '0':
+            break
+
+        else:
+            print("invalid option")
 
 
 if __name__ == "__main__":
