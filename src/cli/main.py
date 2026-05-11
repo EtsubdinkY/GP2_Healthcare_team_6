@@ -658,7 +658,7 @@ def main_menu():
         elif choice == '4': upcoming_appointments(appt_svc)
         elif choice == '5': active_prescriptions(rx_svc)
         elif choice == '6': polypharmacy_report(patient_svc)
-        elif choice == '7': gp3_integration_menu(patient_svc, rx_svc)
+        elif choice == '7': gp3_integration_menu(patient_svc, appt_svc, rx_svc)
         elif choice == '0':
             print("\nGoodbye!")
             break
@@ -667,13 +667,14 @@ def main_menu():
 
 # ---- GP3 cross-database integration functions ----
 
-def gp3_integration_menu(patient_svc, rx_svc):
+def gp3_integration_menu(patient_svc, appt_svc, rx_svc):
     mongo_notes_repo = ClinicalNotesRepository()
     neo4j_repo = KnowledgeGraphRepository()
 
     clinical_service = ClinicalRecordService(
         patient_service=patient_svc,
         prescription_service=rx_svc,
+        appointment_service=appt_svc,
         mongo_notes_repo=mongo_notes_repo,
         neo4j_repo=neo4j_repo
     )
@@ -726,6 +727,19 @@ def gp3_integration_menu(patient_svc, rx_svc):
                     print(f"- {med_name}: {rx.dosage}, {rx.frequency}")
             else:
                 print("- None found")
+            print("\nPostgreSQL: Appointments")
+            if record["appointments"]:
+                for appt in record["appointments"][:5]:
+                    print(f"- {appt.appt_date} {appt.appt_time}: {appt.reason} ({appt.status})")
+            else:
+                print("- None found")
+
+            print("\nPostgreSQL: Labs")
+            if record["labs"]:
+                for lab in record["labs"]:
+                    print(f"- {lab}")
+            else:
+                print("- No lab records available yet")
 
             print("\nMongoDB: Recent Clinical Notes")
             if record["clinical_notes"]:
