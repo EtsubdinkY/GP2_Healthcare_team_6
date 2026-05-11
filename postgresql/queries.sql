@@ -373,5 +373,3 @@ ORDER BY a.severity DESC, patient_name;
 -- |         16 | 0000000016 | Ashley Rivera  | Ibuprofen | Swelling    | Critical | Yes                   | Contact 16 Thompson    | Parent       | 555-5015                |
 -- |          6 | 0000000006 | Barbara Thomas | Ibuprofen | Sneezing    | Critical | Yes                   | Contact 6 Gonzalez     | Guardian     | 555-5005                |
 -- +------------+------------+----------------+-----------+-------------+----------+-----------------------+------------------------+--------------+-------------------------+
-
--
