@@ -233,6 +233,8 @@ CREATE TABLE prescription
     provider_id                   INT            NOT NULL REFERENCES provider (provider_id) ON DELETE RESTRICT ON UPDATE CASCADE,
     med_id                        INT            NOT NULL REFERENCES medication (med_id) ON DELETE RESTRICT ON UPDATE CASCADE,
     date_written                  DATE           NOT NULL,
+    start_date                    DATE,
+    end_date                      DATE,
     dosage                        VARCHAR(50)    NOT NULL,
     frequency                     VARCHAR(50)    NOT NULL,
     quantity                      INT            NOT NULL CHECK (quantity > 0),
@@ -257,7 +259,12 @@ CREATE TABLE prescription
         ),
     CONSTRAINT chk_prescriber_dea_format CHECK (
         prescriber_dea_number IS NULL OR prescriber_dea_number ~ '^[A-Z]{2}\d{7}$'
-        )
+        ),
+    CONSTRAINT chk_rx_start_end_dates CHECK (
+        start_date IS NULL
+        OR end_date IS NULL
+        OR end_date >= start_date
+    )
 );
 
 
