@@ -9,7 +9,7 @@ services:
       POSTGRES_USER: healthcare_admin
       POSTGRES_PASSWORD: enpm818t
     ports:
-      - "5432:5432"
+      - "5433:5432"
     volumes:
       - postgres_data:/var/lib/postgresql/data
       - ./postgresql/schema.sql:/docker-entrypoint-initdb.d/01_schema.sql
