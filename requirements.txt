@@ -1,5 +1,10 @@
 psycopg[binary]==3.1.18
 psycopg-pool==3.2.2
 python-dotenv==1.0.1
+<<<<<<< HEAD
 pymongo==4.17.0
 neo4j==6.2.0
+=======
+neo4j==5.19.0
+pymongo
+>>>>>>> 4f33ee56d7f23638b9a889a0ff9ecacb2de4ff08

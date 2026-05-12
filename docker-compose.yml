@@ -9,7 +9,7 @@ services:
       POSTGRES_USER: healthcare_admin
       POSTGRES_PASSWORD: enpm818t
     ports:
-      - "5432:5432"
+      - "5433:5432"
     volumes:
       - postgres_data:/var/lib/postgresql/data
       - ./postgresql/schema.sql:/docker-entrypoint-initdb.d/01_schema.sql
@@ -19,11 +19,14 @@ services:
   mongodb:
     image: mongo:6
     container_name: healthcare_mongodb
+    environment:
+      MONGO_INITDB_DATABASE: healthcare_management
     ports:
       - "27017:27017"
     volumes:
       - mongo_data:/data/db
-      - ./mongodb:/docker-entrypoint-initdb.d
+      - ./mongodb/mongo_setup.js:/docker-entrypoint-initdb.d/01_mongo_setup.js:ro
+      - ./mongodb/mongo_data.js:/docker-entrypoint-initdb.d/02_mongo_data.js:ro
 
   neo4j:
     image: neo4j:5
