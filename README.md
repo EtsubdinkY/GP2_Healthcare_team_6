@@ -79,6 +79,7 @@ This project uses a polyglot persistence architecture where each database is res
 
 ## 📁 Project Structure
 
+```text
 GP3_Healthcare_Team{X}/
 ├── postgresql/                 # From GP2
 │   ├── schema.sql
@@ -96,7 +97,7 @@ GP3_Healthcare_Team{X}/
 │   ├── database.py             # Existing from GP2
 │   ├── mongodb.py              # New
 │   └── neo4j_config.py         # New
-├── models/                       # Existing from GP2
+├── models/                     # Existing from GP2
 │   └── [entity].py
 ├── repositories/
 │   ├── postgres/               # Existing from GP2
@@ -108,17 +109,16 @@ GP3_Healthcare_Team{X}/
 ├── cli/
 │   └── main.py                 # Updated with 2+ unified operations
 ├── docs/
-│   ├── polyglot_design.pdf      # Partitioning, MongoDB schemas,
-│   │                           # Neo4j node/rel catalog, indexes
+│   ├── polyglot_design.pdf
 │   └── technical_report.pdf
 ├── docker-compose.yml
 ├── Dockerfile
 ├── requirements.txt
-├── .env.example              # template with placeholder values
-├── .env                      # actual values (committed for
-│                             # grading -- see policy below)
+├── .env.example
+├── .env
 ├── README.md
 └── team_contributions.md
+```
 
 ---
 
