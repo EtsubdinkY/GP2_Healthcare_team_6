@@ -337,7 +337,7 @@ docker compose up
 
 ---
 
-# 👩‍💻 Contributers
+# 👩‍💻 Contributors
 
 * Louis Tafah
 * Pushkar Vishwas
