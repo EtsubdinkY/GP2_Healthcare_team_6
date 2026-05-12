@@ -7,7 +7,7 @@ The system combines transactional healthcare operations, flexible clinical docum
 
 ## 🎯 Learning Objectives
 
-By completing this group project, we were able to achived the following:
+By completing this group project, we were able to achieve the following:
 * Recognize when document databases are appropriate for clinical data
 * Design flexible document schemas for clinical documentation
 * Choose embedding vs. referencing for healthcare data
@@ -31,7 +31,7 @@ This project uses a polyglot persistence architecture where each database is res
 | MongoDB    | Flexible clinical/document data                               |
 | Neo4j      | Clinical decision support and drug interaction graph analysis |
 
-🐳Docker Compose orchestrates all services together.
+🐳 Docker Compose orchestrates all services together.
 
 ---
 
@@ -134,7 +134,7 @@ Before starting, install:
 
 ## 🐳 Setup Instructions
 
-## Step 1 — Clone the Repository
+### Step 1 — Clone the Repository
 
 ```bash
 git clone https://github.com/EtsubdinkY/GP2_Healthcare_team_6.git
@@ -143,26 +143,34 @@ cd GP2_Healthcare_team_6
 
 ---
 
-## Step 2 — Start the Full System
+### Step 2 — Start the Full System
 
 ```bash
-docker compose up --build
+docker compose up -d
 ```
 
 This automatically starts:
 
-* PostgreSQL
-* MongoDB
-* Neo4j
-* Python Healthcare CLI Application
+- PostgreSQL
+- MongoDB
+- Neo4j
+- Python Healthcare CLI Application
 
 It also automatically:
 
-* creates databases
-* loads schemas
-* seeds test data
-* initializes MongoDB collections
-* starts Neo4j services
+- Creates databases
+- Loads schemas
+- Seeds test data
+- Initializes MongoDB collections
+- Starts Neo4j services
+
+---
+
+### Step 3 — Launch the Healthcare CLI
+
+```bash
+docker exec -it healthcare_app python -m src.cli.main
+```
 
 ---
 
@@ -218,7 +226,7 @@ Password: enpm818t-neo4j
 
 ---
 
-# ▶️Running the Application
+# ▶️ Running the Application
 
 The Python CLI application automatically starts when Docker Compose launches.
 
@@ -302,7 +310,7 @@ The system uses a layered architecture:
 
 ---
 
-# 🔒Security Considerations
+# 🔒 Security Considerations
 
 * Credentials are isolated within Docker containers
 * Parameterized SQL queries are used throughout
