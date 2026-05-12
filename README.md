@@ -1,87 +1,71 @@
-#  🩺 GP3 Polyglot Healthcare Database Management System
+# 🩺 GP3 Polyglot Healthcare Database Management System
 
-This project is Team 6’s submission for GP3; a complete polyglot healthcare management platform using PostgreSQL, MongoDB, and Neo4j within a Dockerized environment.
-The system combines transactional healthcare operations, flexible clinical document storage, and graph-based clinical decision support into a unified healthcare platform.
+This project is Team 6’s submission for Group Project 3 (GP3) for ENPM818T. It implements a complete polyglot healthcare management platform using PostgreSQL, MongoDB, and Neo4j deployed through Docker Compose.
 
----
-
-## 🎯 Learning Objectives
-
-By completing this group project, we were able to achieve the following:
-* Recognize when document databases are appropriate for clinical data
-* Design flexible document schemas for clinical documentation
-* Choose embedding vs. referencing for healthcare data
-* Write MongoDB aggregation pipelines and text search on clinical narratives
-* Design medical knowledge graphs with clinically meaningful relationships
-* Write Cypher queries for drug interaction checking
-* Implement clinical decision support using graph traversals
-* Build a complete three-database healthcare architecture
-* Deploy polyglot systems using Docker Compose
-* Document complex clinical systems professionally
+The system combines transactional healthcare operations, flexible clinical document storage, and graph-based clinical decision support into a single integrated healthcare platform.
 
 ---
 
-## 🧩 Polyglot Database Architecture
+# System Architecture Overview
 
-This project uses a polyglot persistence architecture where each database is responsible for a specialized workload.
+This project uses a polyglot persistence architecture where each database handles a specialized workload.
 
-| Database   | Purpose                                                       |
-| ---------- | ------------------------------------------------------------- |
-| PostgreSQL | Transactional healthcare records                              |
-| MongoDB    | Flexible clinical/document data                               |
-| Neo4j      | Clinical decision support and drug interaction graph analysis |
+| Database   | Responsibility |
+|-----------|----------------|
+| PostgreSQL | Transactional healthcare records including patients, providers, appointments, prescriptions, billing, admissions, and laboratory data |
+| MongoDB | Semi-structured clinical documentation including notes, care plans, surveys, and imaging metadata |
+| Neo4j | Clinical knowledge graph for medication interaction analysis and prescription safety decision support |
 
-🐳 Docker Compose orchestrates all services together.
-
----
-
-# ✨ System Features
-
-## 🐘 PostgreSQL Features
-
-* Patient management
-* Appointment scheduling
-* Prescription management
-* Insurance tracking
-* Billing support
-* Polypharmacy reporting
-* Provider workload analytics
-
-## 🍃 MongoDB Features
-
-* Flexible patient clinical notes
-* Symptom logs
-* Medical history records
-* Semi-structured healthcare documents
-
-## 🧠 Neo4j Features
-
-* Drug interaction analysis
-* Clinical knowledge graph
-* Prescription safety checks
-* Relationship-based healthcare analytics
+Docker Compose orchestrates all services into a unified deployment environment.
 
 ---
 
-## 💻 Technologies Used
+# Key Features
 
-* Python 3.11
-* PostgreSQL 14
-* MongoDB 6
-* Neo4j 5
-* Docker
-* Docker Compose
-* psycopg3
-* MongoDB Compass
-* Neo4j Browser
+## PostgreSQL Features
+- Patient management
+- Appointment scheduling
+- Prescription management
+- Insurance tracking
+- Billing workflows
+- Laboratory orders and results
+- Polypharmacy reporting
+- Provider analytics
+
+## MongoDB Features
+- Flexible clinical note storage
+- Care plans
+- Patient surveys
+- Medical imaging metadata
+- Semi-structured healthcare document retrieval
+
+## Neo4j Features
+- Drug interaction analysis
+- Clinical knowledge graph traversal
+- Prescription safety validation
+- Medication contraindication analysis
 
 ---
 
-## 📁 Project Structure
+# Technology Stack
+
+- Python 3.11
+- PostgreSQL 14
+- MongoDB 6
+- Neo4j 5
+- Docker
+- Docker Compose
+- psycopg3
+- pymongo
+- neo4j Python driver
+
+---
+
+# Project Structure
 
 ```text
-GP3_Healthcare_Team{X}/
-├── postgresql/                 # From GP2
+GP2_Healthcare_team_6/
+├── postgresql/
 │   ├── schema.sql
 │   ├── data.sql
 │   └── queries.sql
@@ -93,21 +77,19 @@ GP3_Healthcare_Team{X}/
 │   ├── graph_setup.cypher
 │   ├── graph_data.cypher
 │   └── cypher_queries.cypher
-├── config/
-│   ├── database.py             # Existing from GP2
-│   ├── mongodb.py              # New
-│   └── neo4j_config.py         # New
-├── models/                     # Existing from GP2
-│   └── [entity].py
-├── repositories/
-│   ├── postgres/               # Existing from GP2
-│   ├── mongodb/
-│   └── neo4j/
-├── services/
-│   ├── clinical_service.py     # Existing, now cross-database
-│   └── prescription_safety.py  # New: uses Neo4j
-├── cli/
-│   └── main.py                 # Updated with 2+ unified operations
+├── src/
+│   ├── config/
+│   │   ├── database.py
+│   │   ├── mongodb.py
+│   │   └── neo4j_config.py
+│   ├── models/
+│   ├── repositories/
+│   │   ├── postgres/
+│   │   ├── mongodb/
+│   │   └── neo4j/
+│   ├── services/
+│   └── cli/
+│       └── main.py
 ├── docs/
 │   ├── polyglot_design.pdf
 │   └── technical_report.pdf
@@ -122,73 +104,23 @@ GP3_Healthcare_Team{X}/
 
 ---
 
-# 📋 Prerequisites
+# Prerequisites
 
-Before starting, install:
+Install:
 
-* Docker Desktop
-* Docker Compose
-* Git
+- Docker Desktop
+- Docker Compose
+- Git
 
----
-
-## 🐳 Setup Instructions
-
-### Step 1 — Clone the Repository
-
-```bash
-git clone https://github.com/EtsubdinkY/GP2_Healthcare_team_6.git
-cd GP2_Healthcare_team_6
-```
+No separate MongoDB, PostgreSQL, or Neo4j installation is required when using Docker Compose.
 
 ---
 
-### Step 2 — Start the Full System
+# Credentials for Grading
 
-```bash
-docker compose up -d
-```
+The assignment requires committed runtime credentials so the grader can run the system without manual changes.
 
-This automatically starts:
-
-- PostgreSQL
-- MongoDB
-- Neo4j
-- Python Healthcare CLI Application
-
-It also automatically:
-
-- Creates databases
-- Loads schemas
-- Seeds test data
-- Initializes MongoDB collections
-- Starts Neo4j services
-
----
-
-### Step 3 — Launch the Healthcare CLI
-
-```bash
-docker exec -it healthcare_app python -m src.cli.main
-```
-
----
-
-## 🌐 Service Access Information
-
-| Service       | Port  |
-| ------------- | ----- |
-| PostgreSQL    | 5433  |
-| MongoDB       | 27017 |
-| Neo4j Browser | 7474  |
-| Neo4j Bolt    | 7687  |
-
----
-
-## 🐘 PostgreSQL Connection Information
-
-Use these credentials for DataGrip, pgAdmin, or VS Code Database Explorer:
-
+## PostgreSQL
 ```text
 Host: localhost
 Port: 5433
@@ -197,40 +129,141 @@ User: healthcare_admin
 Password: enpm818t
 ```
 
----
-
-## 🍃 MongoDB Connection
-
-For MongoDB Compass:
-
+## MongoDB
 ```text
 mongodb://localhost:27017
 ```
 
----
-
-## 🧠 Neo4j Browser
-
-Open in browser:
-
+## Neo4j
 ```text
-http://localhost:7474
-```
-
-Credentials:
-
-```text
+Browser URL: http://localhost:7474
 Username: neo4j
 Password: enpm818t-neo4j
 ```
 
 ---
 
-# ▶️ Running the Application
+# Setup Instructions
 
-The Python CLI application automatically starts when Docker Compose launches.
+## 1. Clone Repository
 
-You should see:
+```bash
+git clone https://github.com/EtsubdinkY/GP2_Healthcare_team_6.git
+cd GP2_Healthcare_team_6
+```
+
+Note: The repository name remains GP2_Healthcare_team_6 because GP3 builds on the GP2 codebase.
+
+---
+
+## 2. Start the Full Polyglot System
+
+```bash
+docker-compose up --build
+```
+
+This starts:
+
+- PostgreSQL
+- MongoDB
+- Neo4j
+- Python application container
+
+It also:
+
+- loads PostgreSQL schema
+- seeds PostgreSQL test data
+- initializes MongoDB collections
+- loads MongoDB sample documents
+- initializes Neo4j graph
+- starts the healthcare CLI application
+
+---
+
+## 3. Launch CLI
+
+If needed:
+
+```bash
+docker exec -it healthcare_app python -m src.cli.main
+```
+
+---
+
+# Service Access
+
+| Service | Port |
+|--------|------|
+| PostgreSQL | 5433 |
+| MongoDB | 27017 |
+| Neo4j Browser | 7474 |
+| Neo4j Bolt | 7687 |
+
+---
+
+# Unified Cross-Database Operations
+
+## 1. Complete Patient Record
+
+This workflow demonstrates all three databases working together.
+
+### Databases Used
+
+**PostgreSQL**
+- patient demographics
+- active prescriptions
+- appointments
+- laboratory results
+
+**MongoDB**
+- recent clinical notes
+- care plans
+
+**Neo4j**
+- medication interaction safety analysis
+
+This operation builds a unified patient record from all database systems.
+
+---
+
+## 2. Prescription Safety Check
+
+This workflow provides clinical decision support during medication ordering.
+
+### Databases Used
+
+**PostgreSQL**
+- patient validation
+- active medication retrieval
+- prescription insertion
+
+**Neo4j**
+- medication interaction lookup
+- contraindication analysis
+
+### Workflow
+
+1. Validate patient in PostgreSQL
+2. Retrieve active medications
+3. Compare proposed medication against Neo4j knowledge graph
+4. If unsafe:
+   - display warnings
+   - block prescription insertion
+5. If safe:
+   - allow provider confirmation
+   - insert prescription into PostgreSQL
+
+---
+
+# Running the Application
+
+Launch:
+
+```bash
+docker exec -it healthcare_app python -m src.cli.main
+```
+
+Main menu:
 
 ```text
 ##################################################
@@ -242,112 +275,64 @@ You should see:
 
 ---
 
-# 📋 CLI Features
+# Analytics and Query Support
 
-## 1. 👨‍⚕️Patient Management
+## PostgreSQL
+Healthcare reporting and analytics queries:
 
-* View patient records
-* Add/update/delete patients
-* Search patients
-* View patient dashboards
-* Polypharmacy risk reports
+- patient care coordination
+- provider workload analysis
+- billing analytics
+- prescription analytics
+- controlled substances reporting
+- appointment analytics
+- polypharmacy risk analysis
 
-## 2. 📅Appointment Management
+## MongoDB
+Clinical document queries:
 
-* Schedule appointments
-* View upcoming appointments
-* Cancel/update appointments
-* Provider scheduling analytics
+- aggregation pipelines
+- patient timeline analysis
+- text search across clinical narratives
+- array operations for care plans
 
-## 3. 💊Prescription Management
+## Neo4j
+Clinical graph queries:
 
-* Create prescriptions
-* Update/discontinue medications
-* Controlled substance reporting
-* Prescription history tracking
-
-## 4. 📊Quick Views
-
-* Upcoming appointments
-* Active prescriptions
-* Polypharmacy analytics
-
-## 🔄 GP3 Cross-Database Operations
-
-* PostgreSQL transactional queries
-* MongoDB clinical document retrieval
-* Neo4j drug interaction analysis
-* Cross-database healthcare analytics
+- medication interaction checking
+- disease treatment pathways
+- contraindication analysis
+- clinical decision support traversals
 
 ---
 
-# 🧪 SQL Analytics Queries
+# Security Notes
 
-The `postgresql/queries.sql` file contains advanced healthcare analytics queries including:
-
-1. Patient care coordination
-2. Polypharmacy risk analysis
-3. Provider workload analysis
-4. Insurance coverage breakdown
-5. Prescription cost analysis
-6. Provider productivity metrics
-7. Controlled substances reporting
-8. Appointment status analytics
+- Synthetic healthcare data only
+- No real patient information
+- Parameterized SQL queries used
+- Environment-based configuration
+- Database services isolated through Docker networking
 
 ---
 
-# 🏗️ Architecture Design
-
-The system uses a layered architecture:
-
-| Layer        | Purpose                                  |
-| ------------ | ---------------------------------------- |
-| Config       | Database connection management           |
-| Models       | Python dataclasses representing entities |
-| Repositories | Database interaction layer               |
-| Services     | Business logic layer                     |
-| CLI          | User interface layer                     |
-
----
-
-# 🔒 Security Considerations
-
-* Credentials are isolated within Docker containers
-* Parameterized SQL queries are used throughout
-* Synthetic healthcare data only
-* No real patient data is stored
-* Database access separated by service boundaries
-
----
-
-# 🛑 Stopping the System
+# Stopping the System
 
 ```bash
-docker compose down
+docker-compose down
+```
+
+To remove volumes and fully reset:
+
+```bash
+docker-compose down -v
 ```
 
 ---
 
-# 🔁 Restarting the System
+# Contributors
 
-```bash
-docker compose up
-```
-
----
-
-# ⚠️ Notes
-
-* Neo4j is used for graph-based clinical decision support.
-* MongoDB stores semi-structured clinical information.
-* PostgreSQL maintains transactional consistency for healthcare operations.
-* Docker volumes preserve database data between restarts.
-
----
-
-# 👩‍💻 Contributors
-
-* Louis Tafah
-* Pushkar Vishwas
-* Adyasha Mishra
-* Etsubdink Workalemahu Yergashewa
+- Louis Tafah
+- Pushkar Vishwas
+- Adyasha Mishra
+- Etsubdink Workalemahu Yergashewa
