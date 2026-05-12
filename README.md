@@ -1,191 +1,345 @@
-# GP2 Healthcare Management System
+#  🩺 GP3 Polyglot Healthcare Database Management System
 
-This is our team's submission for GP2 — a PostgreSQL-backed healthcare app with a Python CLI for handling patients, appointments, and prescriptions.
+This project is Team 6’s submission for GP3; a complete polyglot healthcare management platform using PostgreSQL, MongoDB, and Neo4j within a Dockerized environment.
+The system combines transactional healthcare operations, flexible clinical document storage, and graph-based clinical decision support into a unified healthcare platform.
 
-## Team 6
+---
 
-- Louis Tafah
-- Pushkar Vishwas
-- Adyasha Mishra
-- Etsubdink Workalemahu Yergashewa
+## 🎯 Learning Objectives
 
-## What You Need Before Starting
+By completing this group project, we were able to achived the following:
+* Recognize when document databases are appropriate for clinical data
+* Design flexible document schemas for clinical documentation
+* Choose embedding vs. referencing for healthcare data
+* Write MongoDB aggregation pipelines and text search on clinical narratives
+* Design medical knowledge graphs with clinically meaningful relationships
+* Write Cypher queries for drug interaction checking
+* Implement clinical decision support using graph traversals
+* Build a complete three-database healthcare architecture
+* Deploy polyglot systems using Docker Compose
+* Document complex clinical systems professionally
 
-- Python 3.10+
-- PostgreSQL 14+
-- pip
+---
 
-## How the Project Is Organized
+## 🧩 Polyglot Database Architecture
 
-```
-GP2_Healthcare_team_6/
-├── postgresql/
-│   ├── schema.sql          # all the tables, constraints, triggers
-│   ├── data.sql            # test data we generated
-│   └── queries.sql         # the 8 SQL queries
-├── src/
-│   ├── config/
-│   │   └── database.py     # sets up connection pooling
-│   ├── models/
-│   │   ├── patient.py
-│   │   ├── appointment.py
-│   │   ├── prescription.py
-│   │   ├── provider.py
-│   │   ├── medication.py
-│   │   ├── hospital.py
-│   │   └── patient_insurance.py
-│   ├── repositories/
-│   │   ├── base_repository.py
-│   │   ├── patient_repo.py
-│   │   ├── appointment_repo.py
-│   │   ├── prescription_repo.py
-│   │   ├── provider_repo.py
-│   │   ├── patient_insurance_repo.py
-│   │   ├── medication_repo.py
-│   │   └── hospital_repo.py
-│   ├── services/
-│   │   ├── patient_service.py
-│   │   ├── appointment_service.py
-│   │   └── prescription_service.py
-│   └── cli/
-│       └── main.py
-├── tests/
+This project uses a polyglot persistence architecture where each database is responsible for a specialized workload.
+
+| Database   | Purpose                                                       |
+| ---------- | ------------------------------------------------------------- |
+| PostgreSQL | Transactional healthcare records                              |
+| MongoDB    | Flexible clinical/document data                               |
+| Neo4j      | Clinical decision support and drug interaction graph analysis |
+
+🐳Docker Compose orchestrates all services together.
+
+---
+
+# ✨ System Features
+
+## 🐘 PostgreSQL Features
+
+* Patient management
+* Appointment scheduling
+* Prescription management
+* Insurance tracking
+* Billing support
+* Polypharmacy reporting
+* Provider workload analytics
+
+## 🍃 MongoDB Features
+
+* Flexible patient clinical notes
+* Symptom logs
+* Medical history records
+* Semi-structured healthcare documents
+
+## 🧠 Neo4j Features
+
+* Drug interaction analysis
+* Clinical knowledge graph
+* Prescription safety checks
+* Relationship-based healthcare analytics
+
+---
+
+## 💻 Technologies Used
+
+* Python 3.11
+* PostgreSQL 14
+* MongoDB 6
+* Neo4j 5
+* Docker
+* Docker Compose
+* psycopg3
+* MongoDB Compass
+* Neo4j Browser
+
+---
+
+## 📁 Project Structure
+
+GP3_Healthcare_Team{X}/
+├── postgresql/                 # From GP2
+│   ├── schema.sql
+│   ├── data.sql
+│   └── queries.sql
+├── mongodb/
+│   ├── mongo_setup.js
+│   ├── mongo_data.js
+│   └── mongo_queries.js
+├── neo4j/
+│   ├── graph_setup.cypher
+│   ├── graph_data.cypher
+│   └── cypher_queries.cypher
+├── config/
+│   ├── database.py             # Existing from GP2
+│   ├── mongodb.py              # New
+│   └── neo4j_config.py         # New
+├── models/                       # Existing from GP2
+│   └── [entity].py
+├── repositories/
+│   ├── postgres/               # Existing from GP2
+│   ├── mongodb/
+│   └── neo4j/
+├── services/
+│   ├── clinical_service.py     # Existing, now cross-database
+│   └── prescription_safety.py  # New: uses Neo4j
+├── cli/
+│   └── main.py                 # Updated with 2+ unified operations
+├── docs/
+│   ├── polyglot_design.pdf      # Partitioning, MongoDB schemas,
+│   │                           # Neo4j node/rel catalog, indexes
+│   └── technical_report.pdf
+├── docker-compose.yml
+├── Dockerfile
 ├── requirements.txt
-├── .env.example
-└── README.md
-```
+├── .env.example              # template with placeholder values
+├── .env                      # actual values (committed for
+│                             # grading -- see policy below)
+├── README.md
+└── team_contributions.md
 
-## Setup Instructions
+---
 
-### Step 1 — Clone the repo
+# 📋 Prerequisites
+
+Before starting, install:
+
+* Docker Desktop
+* Docker Compose
+* Git
+
+---
+
+## 🐳 Setup Instructions
+
+## Step 1 — Clone the Repository
 
 ```bash
 git clone https://github.com/EtsubdinkY/GP2_Healthcare_team_6.git
 cd GP2_Healthcare_team_6
 ```
 
-### Step 2 — Set up a virtual environment (recommended)
+---
+
+## Step 2 — Start the Full System
 
 ```bash
-python -m venv venv
-
-# on Windows:
-venv\Scripts\activate
-
-# on Mac/Linux:
-source venv/bin/activate
+docker compose up --build
 ```
 
-### Step 3 — Install the dependencies
+This automatically starts:
 
-```bash
-pip install -r requirements.txt
+* PostgreSQL
+* MongoDB
+* Neo4j
+* Python Healthcare CLI Application
+
+It also automatically:
+
+* creates databases
+* loads schemas
+* seeds test data
+* initializes MongoDB collections
+* starts Neo4j services
+
+---
+
+## 🌐 Service Access Information
+
+| Service       | Port  |
+| ------------- | ----- |
+| PostgreSQL    | 5433  |
+| MongoDB       | 27017 |
+| Neo4j Browser | 7474  |
+| Neo4j Bolt    | 7687  |
+
+---
+
+## 🐘 PostgreSQL Connection Information
+
+Use these credentials for DataGrip, pgAdmin, or VS Code Database Explorer:
+
+```text
+Host: localhost
+Port: 5433
+Database: healthcare_management
+User: healthcare_admin
+Password: enpm818t
 ```
 
-### Step 4 — Set up your environment variables
+---
 
-Copy `.env.example` to `.env` and fill in your own database info:
+## 🍃 MongoDB Connection
 
-```bash
-cp .env.example .env
+For MongoDB Compass:
+
+```text
+mongodb://localhost:27017
 ```
 
-The `.env` file should look something like this:
+---
 
-```
-DB_HOST=localhost
-DB_PORT=5432
-DB_NAME=healthcare_management
-DB_USER=postgres
-DB_PASSWORD=your_password_here
-DB_POOL_MIN_SIZE=1
-DB_POOL_MAX_SIZE=5
+## 🧠 Neo4j Browser
+
+Open in browser:
+
+```text
+http://localhost:7474
 ```
 
-### Step 5 — Create and load the database
+Credentials:
 
-```bash
-psql -U postgres
+```text
+Username: neo4j
+Password: enpm818t-neo4j
 ```
 
-Inside psql:
+---
 
-```sql
-CREATE DATABASE healthcare_management;
-\q
+# ▶️Running the Application
+
+The Python CLI application automatically starts when Docker Compose launches.
+
+You should see:
+
+```text
+##################################################
+#                                                #
+#       HEALTHCARE MANAGEMENT SYSTEM             #
+#                                                #
+##################################################
 ```
 
-Then from your terminal:
+---
 
-```bash
-psql -U postgres -d healthcare_management -f postgresql/schema.sql
-psql -U postgres -d healthcare_management -f postgresql/data.sql
-```
+# 📋 CLI Features
 
-## Running It
+## 1. 👨‍⚕️Patient Management
 
-From the project root:
+* View patient records
+* Add/update/delete patients
+* Search patients
+* View patient dashboards
+* Polypharmacy risk reports
 
-```bash
-python -m src.cli.main
-```
+## 2. 📅Appointment Management
 
-## What the CLI Can Do
+* Schedule appointments
+* View upcoming appointments
+* Cancel/update appointments
+* Provider scheduling analytics
 
-The main menu has four sections:
+## 3. 💊Prescription Management
 
-**1. Patient Management**
-- list patients, view details, see full dashboard
-- add / update / delete patients
-- search by name
-- polypharmacy risk report (patients on 5+ active meds)
+* Create prescriptions
+* Update/discontinue medications
+* Controlled substance reporting
+* Prescription history tracking
 
-**2. Appointment Management**
-- list and view appointments
-- see upcoming scheduled ones
-- schedule new, update, or cancel existing
-- filter by date
+## 4. 📊Quick Views
 
-**3. Prescription Management**
-- list and view prescriptions
-- create, update, discontinue
-- patient prescription history
-- controlled substances report
+* Upcoming appointments
+* Active prescriptions
+* Polypharmacy analytics
 
-**4. Quick Views**
-- upcoming appointments
-- active prescriptions
-- polypharmacy flag
+## 🔄 GP3 Cross-Database Operations
 
-## The SQL Queries
+* PostgreSQL transactional queries
+* MongoDB clinical document retrieval
+* Neo4j drug interaction analysis
+* Cross-database healthcare analytics
 
-`postgresql/queries.sql` has 8 queries:
+---
 
-1. Patient care coordination — pulls demographics, insurance, and active meds for incoming patients
-2. Polypharmacy risk — flags patients on 5 or more active prescriptions
-3. Provider workload — counts upcoming appointments per provider
-4. Insurance coverage breakdown by plan
-5. Prescription cost and coverage analysis
+# 🧪 SQL Analytics Queries
+
+The `postgresql/queries.sql` file contains advanced healthcare analytics queries including:
+
+1. Patient care coordination
+2. Polypharmacy risk analysis
+3. Provider workload analysis
+4. Insurance coverage breakdown
+5. Prescription cost analysis
 6. Provider productivity metrics
-7. Controlled substances report (Schedule II, DEA)
-8. Appointment status breakdown by facility
+7. Controlled substances reporting
+8. Appointment status analytics
 
-## Architecture Notes
+---
 
-We went with a layered approach:
+# 🏗️ Architecture Design
 
-- **Config** — connection pool setup via psycopg3
-- **Models** — Python dataclasses that mirror the DB tables, each with a `from_row()` method
-- **Repositories** — one per table, handles all SQL; patients/appointments/prescriptions are full CRUD, the rest are read-only
-- **Services** — business logic lives here, calls into multiple repos as needed
-- **CLI** — menu-driven interface, calls into the service layer
+The system uses a layered architecture:
 
-## Python Dependencies
+| Layer        | Purpose                                  |
+| ------------ | ---------------------------------------- |
+| Config       | Database connection management           |
+| Models       | Python dataclasses representing entities |
+| Repositories | Database interaction layer               |
+| Services     | Business logic layer                     |
+| CLI          | User interface layer                     |
 
-- `psycopg[binary]` 3.1.18
-- `psycopg-pool` 3.2.2
-- `python-dotenv` 1.0.1
+---
 
-## A Note on Security
+# 🔒Security Considerations
 
-Credentials stay in `.env` which is gitignored. All queries use parameterized statements (no string formatting into SQL). SSN fields are optional. This project only uses synthetic data — nothing real.
+* Credentials are isolated within Docker containers
+* Parameterized SQL queries are used throughout
+* Synthetic healthcare data only
+* No real patient data is stored
+* Database access separated by service boundaries
+
+---
+
+# 🛑 Stopping the System
+
+```bash
+docker compose down
+```
+
+---
+
+# 🔁 Restarting the System
+
+```bash
+docker compose up
+```
+
+---
+
+# ⚠️ Notes
+
+* Neo4j is used for graph-based clinical decision support.
+* MongoDB stores semi-structured clinical information.
+* PostgreSQL maintains transactional consistency for healthcare operations.
+* Docker volumes preserve database data between restarts.
+
+---
+
+# 👩‍💻 Contributers
+
+* Louis Tafah
+* Pushkar Vishwas
+* Adyasha Mishra
+* Etsubdink Workalemahu Yergashewa
