@@ -20,6 +20,8 @@ class Prescription:
     controlled_substance_schedule: Optional[str]
     prescriber_dea_number: Optional[str]
     status: str
+    start_date: date | None = None
+    end_date: date | None = None
     created_at: Optional[datetime] = None
     updated_at: Optional[datetime] = None
 

@@ -129,3 +129,35 @@ class KnowledgeGraphRepository:
         """
         results = execute_query(query, {"severity": severity})
         return [DrugInteraction(**r) for r in results]
+        
+    # GP3 helper for CLI cross-database operations
+    # This checks interactions using medication NAMES instead of IDs
+    
+    def check_interactions(self, medication_names):
+        if not medication_names or len(medication_names) < 2:
+            return []
+
+        query = """
+        MATCH (m1:Medication)-[i:INTERACTS_WITH]->(m2:Medication)
+        WHERE m1.name IN $medication_names
+          AND m2.name IN $medication_names
+          AND m1.name <> m2.name
+        RETURN DISTINCT
+               m1.name AS medication1,
+               m2.name AS medication2,
+               i.severity AS severity,
+               i.description AS description
+        ORDER BY CASE i.severity
+            WHEN 'contraindicated' THEN 1
+            WHEN 'major' THEN 2
+            WHEN 'moderate' THEN 3
+            ELSE 4
+        END
+        """
+
+        results = execute_query(
+            query,
+            {"medication_names": medication_names}
+        )
+
+        return [DrugInteraction(**r) for r in results]
