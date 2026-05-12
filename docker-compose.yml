@@ -39,6 +39,14 @@ services:
     volumes:
       - neo4j_data:/data
       - ./neo4j:/var/lib/neo4j/import
+    command: >
+      bash -c "
+      /startup/docker-entrypoint.sh neo4j &
+      sleep 20 &&
+      cypher-shell -u neo4j -p enpm818t-neo4j -f /var/lib/neo4j/import/graph_setup.cypher &&
+      cypher-shell -u neo4j -p enpm818t-neo4j -f /var/lib/neo4j/import/graph_data.cypher &&
+      wait
+      "
 
   app:
     build: .
