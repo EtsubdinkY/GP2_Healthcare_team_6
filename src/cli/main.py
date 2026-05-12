@@ -10,6 +10,8 @@ from src.services.clinical_record_service import ClinicalRecordService
 from src.services.prescription_safety_service import PrescriptionSafetyService
 from src.repositories.mongodb.clinical_notes_repo import ClinicalNotesRepository
 from src.repositories.neo4j.knowledge_graph_repo import KnowledgeGraphRepository
+from src.repositories.mongodb.care_plan_repo import CarePlanRepository
+from src.services.lab_service import LabService
 
 # helper functions for input
 
@@ -665,17 +667,19 @@ def main_menu():
         else:
             print("invalid, try again")
 
-# ---- GP3 cross-database integration functions ----
-
 def gp3_integration_menu(patient_svc, appt_svc, rx_svc):
     mongo_notes_repo = ClinicalNotesRepository()
+    mongo_care_plan_repo = CarePlanRepository()
     neo4j_repo = KnowledgeGraphRepository()
+    lab_svc = LabService()
 
     clinical_service = ClinicalRecordService(
         patient_service=patient_svc,
         prescription_service=rx_svc,
         appointment_service=appt_svc,
+        lab_service=lab_svc,
         mongo_notes_repo=mongo_notes_repo,
+        mongo_care_plan_repo=mongo_care_plan_repo,
         neo4j_repo=neo4j_repo
     )
 
@@ -710,7 +714,7 @@ def gp3_integration_menu(patient_svc, appt_svc, rx_svc):
 
             print("\n========== COMPLETE PATIENT RECORD ==========")
 
-            print("\nPostgreSQL: Patient Demographics")
+            print("\nPatient Demographics (PostgreSQL)")
             if patient:
                 print(f"ID: {patient.patient_id}")
                 print(f"Name: {patient.first_name} {patient.last_name}")
@@ -719,7 +723,7 @@ def gp3_integration_menu(patient_svc, appt_svc, rx_svc):
             else:
                 print("Patient not found.")
 
-            print("\nPostgreSQL: Active Medications")
+            print("\nActive Medications (PostgreSQL)")
             if record["active_medications"]:
                 for item in record["active_medications"]:
                     med_name = item.medication.name if getattr(item, "medication", None) else "Unknown"
@@ -727,33 +731,62 @@ def gp3_integration_menu(patient_svc, appt_svc, rx_svc):
                     print(f"- {med_name}: {rx.dosage}, {rx.frequency}")
             else:
                 print("- None found")
-            print("\nPostgreSQL: Appointments")
+
+            print("\nAppointments (PostgreSQL)")
             if record["appointments"]:
                 for appt in record["appointments"][:5]:
                     print(f"- {appt.appt_date} {appt.appt_time}: {appt.reason} ({appt.status})")
             else:
                 print("- None found")
 
-            print("\nPostgreSQL: Labs")
+            print("\nLaboratory Results (PostgreSQL)")
             if record["labs"]:
                 for lab in record["labs"]:
-                    print(f"- {lab}")
+                    value = lab["value"] if lab["value"] is not None else "Pending"
+                    unit = lab["unit"] or ""
+                    flag = lab["abnormal_flag"] or "N/A"
+                    print(
+                        f"- {lab['test_name']} ({lab['test_code']}): "
+                        f"{value} {unit} | Status: {lab['status']} | Flag: {flag}"
+                    )
             else:
                 print("- No lab records available yet")
 
-            print("\nMongoDB: Recent Clinical Notes")
+            print("\nRecent Clinical Notes (MongoDB)")
             if record["clinical_notes"]:
                 for note in record["clinical_notes"]:
-                    print(f"- {note}")
+                    date_str = str(note.get('encounter_date', 'N/A')).split("T")[0]
+                    print(f"- Date: {date_str}")
+                    print(f"  Type: {note.get('note_type', 'N/A')}")
+                    print(f"  Chief Complaint: {note.get('chief_complaint', 'N/A')}")
+                    print(f"  Assessment: {note.get('assessment', note.get('discharge_diagnosis', 'N/A'))}")
+                    print(f"  Plan: {note.get('plan', note.get('recommendations', note.get('follow_up', 'N/A')))}")
+                    print()
             else:
                 print("- No MongoDB notes available yet")
 
-            print("\nNeo4j: Medication Safety Alerts")
+            print("\nCare Plans (MongoDB)")
+            if record["care_plans"]:
+                for plan in record["care_plans"]:
+                    diagnosis = plan.get("primary_diagnosis", {})
+                    print(f"- Diagnosis: {diagnosis.get('name', 'N/A')}")
+                    print(f"  Status: {plan.get('status', 'N/A')}")
+                    print(f"  Last Reviewed: {str(plan.get('last_reviewed', 'N/A')).split('T')[0]}")
+                    print(f"  Review Frequency: {plan.get('review_frequency_days', 'N/A')} days")
+
+                    goals = plan.get("goals", [])
+                    if goals:
+                        print("  Goals:")
+                        for goal in goals[:2]:
+                            print(f"    - {goal.get('description', 'N/A')} ({goal.get('status', 'N/A')})")
+                    print()
+            else:
+                print("- No active care plans found")
+
             if record["safety_alerts"]:
+                print("\nMedication Safety Alerts (Neo4j)")
                 for alert in record["safety_alerts"]:
                     print(f"- {alert.medication1} + {alert.medication2}: {alert.severity} - {alert.description}")
-            else:
-                print("- No interaction alerts found")
 
             input("\nPress Enter...")
 
@@ -776,7 +809,43 @@ def gp3_integration_menu(patient_svc, appt_svc, rx_svc):
                 print("\nPrescription should NOT be inserted.")
             else:
                 print("\nNo warnings found.")
-                print("In the final version, the prescription can be inserted into PostgreSQL.")
+
+                insert_choice = get_input(
+                    "Do you want to insert this prescription into PostgreSQL? (yes/no): "
+                )
+
+                if insert_choice.lower() == "yes":
+                    provider_id = get_int("Enter Provider ID: ")
+                    med_id = get_int("Enter Medication ID: ")
+                    date_written = get_date("Date Written")
+                    dosage = get_input("Dosage: ")
+                    frequency = get_input("Frequency: ")
+                    quantity = get_int("Quantity: ")
+                    refills = get_int("Refills: ")
+
+                    rx = Prescription(
+                        rx_id=None,
+                        patient_id=patient_id,
+                        provider_id=provider_id,
+                        med_id=med_id,
+                        date_written=date_written,
+                        dosage=dosage,
+                        frequency=frequency,
+                        quantity=quantity,
+                        refills=refills,
+                        is_controlled=False,
+                        controlled_substance_schedule=None,
+                        prescriber_dea_number=None,
+                        status="active"
+                    )
+
+                    try:
+                        created = rx_svc.create_prescription(rx)
+                        print(f"\nPrescription inserted successfully into PostgreSQL. New Rx ID: {created.rx_id}")
+                    except Exception as e:
+                        print(f"\nPrescription was not inserted. Error: {e}")
+                else:
+                    print("\nPrescription was not inserted.")
 
             input("\nPress Enter...")
 
@@ -785,7 +854,6 @@ def gp3_integration_menu(patient_svc, appt_svc, rx_svc):
 
         else:
             print("invalid option")
-
 
 if __name__ == "__main__":
     try:
